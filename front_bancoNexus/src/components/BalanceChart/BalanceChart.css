@@ -1,0 +1,32 @@
+.chart-container {
+
+  margin-top: 30px;
+
+  padding: 32px;
+
+  background: var(--white);
+
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-card);
+
+}
+
+.chart-container h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1A237E;
+  margin-bottom: 24px;
+}
+
+.BalanceChart p {
+
+  color: var(--gray-dark);
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+
+}
+
+.chart-wrapper {
+  margin-top: 20px;
+}

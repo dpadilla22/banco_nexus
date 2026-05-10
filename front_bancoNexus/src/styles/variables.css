@@ -1,0 +1,25 @@
+:root {
+
+  --primary-blue: #5B6FFF;
+  --secondary-blue: #4D5FE8;
+  --accent-blue: #006FFF;
+  --light-blue: #E8EEFF;
+  --background: #F5F7FA;
+  --white: #FFFFFF;
+  --gray-light: #ECEFF1;
+  --gray-dark: #546E7A;
+  --success: #4CAF50;
+  --danger: #FF6B6B;
+
+  --white-glass: rgba(255, 255, 255, 0.95);
+
+  --shadow: 0 4px 12px rgba(91, 111, 255, 0.15);
+  --shadow-hover: 0 8px 24px rgba(91, 111, 255, 0.25);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  --blur: blur(10px);
+
+  --radius: 16px;
+  --radius-lg: 20px;
+
+}

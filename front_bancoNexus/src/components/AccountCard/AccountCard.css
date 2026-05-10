@@ -1,0 +1,95 @@
+.account-card {
+
+  padding: 40px;
+
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-hover);
+
+  margin-bottom: 40px;
+
+  color: white;
+
+  position: relative;
+  overflow: hidden;
+
+}
+
+.account-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 300px;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.account-card h2 {
+
+  margin-bottom: 30px;
+  font-size: 1.8rem;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+
+}
+
+.info-grid {
+
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 40px;
+  position: relative;
+  z-index: 1;
+
+}
+
+.info-grid>div {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-grid span {
+
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  margin-bottom: 8px;
+
+}
+
+.info-grid h3 {
+
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+
+}
+
+.info-grid h1 {
+
+  margin: 0;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: white;
+
+}
+
+@media (max-width: 768px) {
+  .account-card {
+    padding: 24px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}

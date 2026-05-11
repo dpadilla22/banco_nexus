@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AlertCircle } from "lucide-react";
 
-import Header from "./components/Header/Header";
+import Header from "./components/header/Header";
 import SearchBar from "./components/SearchBar/SearchBar";
 import AccountCard from "./components/AccountCard/AccountCard";
 import TransactionsList from "./components/TransactionsList/TransactionsList";

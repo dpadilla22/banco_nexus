@@ -6,6 +6,13 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
+    "setup": "node setup.js",
+    "db:create": "node crearBaseDeDatos.js",
+    "db:verify": "node verificar-conexion.js",
+    "db:backup": "node sincronizar-datos.js backup",
+    "db:list-backups": "node sincronizar-datos.js list",
+    "db:validate": "node sincronizar-datos.js validate",
+    "db:restore": "node sincronizar-datos.js restore",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

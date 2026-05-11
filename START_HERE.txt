@@ -1,0 +1,51 @@
+╔════════════════════════════════════════════════════════════════╗             ║
+║  Banco Nexus - Etapa 1: Base de Datos Distribuida              ║
+╚════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════
+
+DOCUMENTACIÓN BASICA:
+  INSTALACION_MONGODB.md       → Guía instalación paso a paso
+  PROBLEMAS_Y_SOLUCIONES.md    → 8 problemas comunes + soluciones
+  VERIFICACION_DATOS.md        → Protocolo sincronización
+
+SCRIPTS:
+  setup.js                     → Automatiza todo el setup
+  verificar-conexion.js        → Diagnostica problemas
+  sincronizar-datos.js         → Backup/Restore automático
+
+CONFIGURACIÓN:
+  .env.example                 → Plantilla de variables
+  package.json                 → Scripts npm agregados
+
+═══════════════════════════════════════════════════════════════════
+
+QUICK START 
+
+1️- Ejecuta setup automático:
+   npm run setup
+
+2️- Verifica conexión:
+   npm run db:verify
+
+3️- Si todo está ✅ = LISTO!
+
+═══════════════════════════════════════════════════════════════════
+
+DOCUMENTACIÓN DISPONIBLE:
+
+  README.md                   → Maestro del proyecto
+  INSTALACION_MONGODB.md      → Cómo instalar MongoDB
+  PROBLEMAS_Y_SOLUCIONES.md   → Troubleshooting
+  VERIFICACION_DATOS.md       → Protocolo de sincronización
+
+═══════════════════════════════════════════════════════════════════
+
+COMANDOS VARIOS:
+
+  npm run setup               → Setup automático
+  npm run db:verify           → Ver estado de BD
+  npm run db:create           → Crear datos
+  npm run db:backup           → Hacer backup
+  npm run db:list-backups     → Ver backups
+  npm run db:restore nombre   → Restaurar backup

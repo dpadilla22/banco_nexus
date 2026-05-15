@@ -6,6 +6,7 @@ import SearchBar from "./components/SearchBar/SearchBar";
 import AccountCard from "./components/AccountCard/AccountCard";
 import TransactionsList from "./components/TransactionsList/TransactionsList";
 import BalanceChart from "./components/BalanceChart/BalanceChart";
+import OperationForm from "./components/OperationForm/OperationForm";
 
 function App() {
   const [cuenta, setCuenta] = useState("");
@@ -34,6 +35,23 @@ function App() {
     } catch (error) {
       setError("Error de conexión. Intenta de nuevo.");
       console.log(error);
+    }
+  };
+
+  const manejarOperacionExitosa = async () => {
+    // Reconsultar los datos completos para actualizar transacciones y saldo
+    if (cuenta) {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/cuenta/${cuenta}`,
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setDatos(data);
+        }
+      } catch (error) {
+        console.error("Error al reconsultar la cuenta:", error);
+      }
     }
   };
 
@@ -74,6 +92,12 @@ function App() {
       )}
 
       <AccountCard datos={datos} />
+
+      <OperationForm
+        numeroCuenta={datos?.cuenta?.numeroCuenta}
+        saldoActual={datos?.cuenta?.saldo || 0}
+        onOperationSuccess={manejarOperacionExitosa}
+      />
 
       <TransactionsList datos={datos} />
 

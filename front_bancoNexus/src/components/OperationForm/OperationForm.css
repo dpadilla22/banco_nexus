@@ -1,0 +1,165 @@
+.operation-form {
+    margin-top: 30px;
+    padding: 32px;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
+
+.operation-form h2 {
+    margin-bottom: 24px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1A237E;
+}
+
+.mensaje-exito,
+.mensaje-error {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.mensaje-exito {
+    background: rgba(76, 175, 80, 0.08);
+    border: 1px solid rgba(76, 175, 80, 0.2);
+    color: #2E7D32;
+}
+
+.mensaje-error {
+    background: rgba(244, 67, 54, 0.08);
+    border: 1px solid rgba(244, 67, 54, 0.2);
+    color: #C62828;
+}
+
+.input-group {
+    margin-bottom: 24px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--gray-dark);
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #FAFBFF;
+    border: 1px solid #E3E8EF;
+    border-radius: 12px;
+    padding: 14px 16px;
+    gap: 12px;
+    transition: all 0.25s ease;
+}
+
+.input-wrapper:focus-within {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 4px rgba(1, 138, 190, 0.08);
+}
+
+.input-wrapper input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1A237E;
+}
+
+.input-wrapper input::placeholder {
+    color: #A0AEC0;
+}
+
+.input-wrapper input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.botones-operaciones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.btn-deposito,
+.btn-retiro {
+    padding: 14px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.25s ease;
+}
+
+.btn-deposito {
+    background: #4CAF50;
+    color: white;
+}
+
+.btn-deposito:hover:not(:disabled) {
+    background: #43A047;
+    transform: translateY(-2px);
+}
+
+.btn-retiro {
+    background: #EF5350;
+    color: white;
+}
+
+.btn-retiro:hover:not(:disabled) {
+    background: #E53935;
+    transform: translateY(-2px);
+}
+
+.btn-deposito:disabled,
+.btn-retiro:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.info-saldo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px;
+    background: #FAFBFF;
+    border: 1px solid #EEF1F5;
+    border-radius: 12px;
+}
+
+.info-saldo span {
+    color: var(--gray-dark);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.saldo-texto {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+@media (max-width: 768px) {
+    .operation-form {
+        padding: 24px;
+    }
+
+    .botones-operaciones {
+        grid-template-columns: 1fr;
+    }
+}

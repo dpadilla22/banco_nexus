@@ -11,6 +11,7 @@ const iniciar = async () => {
   await conectar();
 
   app.use("/api/cuenta", require("./routes/cuenta"));
+  app.use("/api", require("./routes/transacciones"));
 
   app.get("/health", (req, res) => res.json({ status: "OK" }));
 

@@ -13,6 +13,8 @@
     "db:list-backups": "node sincronizar-datos.js list",
     "db:validate": "node sincronizar-datos.js validate",
     "db:restore": "node sincronizar-datos.js restore",
+    "sucursales:parallel": "node scripts/sucursales/ejecutarParaleloSucursales.js",
+    "sucursales:consulta": "node scripts/sucursales/consultaSucursalLaPaz.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

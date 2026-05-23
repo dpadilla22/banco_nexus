@@ -1,7 +1,13 @@
 const { MongoClient } = require("mongodb");
 
+// Conexión actual (funciona ahorita)
 const url = "mongodb://localhost:27017";
 
+// Etapa 3 - Replica Set (guardar para después)
+const replicaUrl =
+  "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rsBanco";
+
+// Por ahorita usamos localhost normal
 const client = new MongoClient(url);
 
 async function crearBaseDatos() {
@@ -15,6 +21,10 @@ async function crearBaseDatos() {
     const clientes = db.collection("clientes");
     const cuentas = db.collection("cuentas");
     const transacciones = db.collection("transacciones");
+
+    await clientes.deleteMany({});
+    await cuentas.deleteMany({});
+    await transacciones.deleteMany({});
 
     const resultadoClientes = await clientes.insertMany([
       {
@@ -170,94 +180,103 @@ async function crearBaseDatos() {
 
     const idsCuentas = Object.values(resultadoCuentas.insertedIds);
 
-    const resultadoTransacciones = await transacciones.insertMany([
+    await transacciones.insertMany([
       {
         cuentaId: idsCuentas[0],
         tipo: "Depósito",
         monto: 2000,
-        sucursal:"La paz",
+        sucursal: "La Paz",
         fecha: new Date(),
       },
       {
         cuentaId: idsCuentas[1],
         tipo: "Retiro",
         monto: 500,
-        sucursal:"Los cabos",
+        sucursal: "Los Cabos",
         fecha: new Date(),
       },
       {
         cuentaId: idsCuentas[2],
         tipo: "Transferencia",
         monto: 1200,
-        sucursal:"Loreto",
+        sucursal: "Loreto",
         fecha: new Date(),
       },
       {
         cuentaId: idsCuentas[3],
         tipo: "Depósito",
         monto: 3500,
-        sucursal:"La paz",
+        sucursal: "La Paz",
         fecha: new Date(),
       },
       {
         cuentaId: idsCuentas[4],
         tipo: "Pago",
         monto: 900,
-        sucursal:"Los cabos",
+        sucursal: "Los Cabos",
         fecha: new Date(),
       },
       {
         cuentaId: idsCuentas[5],
         tipo: "Retiro",
         monto: 2500,
-        sucursal:"Mulege",
+        sucursal: "Mulegé",
         fecha: new Date(),
       },
       {
         cuentaId: idsCuentas[6],
         tipo: "Depósito",
         monto: 1800,
-        sucursal:"La paz",
+        sucursal: "La Paz",
         fecha: new Date(),
       },
       {
         cuentaId: idsCuentas[7],
         tipo: "Transferencia",
         monto: 4000,
-        sucursal:"Loreto",
+        sucursal: "Loreto",
         fecha: new Date(),
       },
       {
         cuentaId: idsCuentas[8],
         tipo: "Depósito",
         monto: 3000,
-        sucursal:"Mulege",
+        sucursal: "Mulegé",
         fecha: new Date(),
       },
       {
         cuentaId: idsCuentas[9],
         tipo: "Retiro",
         monto: 700,
-        sucursal:"Los cabos",
+        sucursal: "Los Cabos",
         fecha: new Date(),
       },
       {
         cuentaId: idsCuentas[10],
         tipo: "Transferencia",
         monto: 5000,
-        sucursal:"La paz",
+        sucursal: "La Paz",
         fecha: new Date(),
       },
       {
         cuentaId: idsCuentas[11],
         tipo: "Pago",
         monto: 1200,
-        sucursal:"Mulege",
+        sucursal: "Mulegé",
         fecha: new Date(),
       },
     ]);
 
     console.log("Datos insertados");
+
+    const totalClientes = await clientes.countDocuments();
+    const totalCuentas = await cuentas.countDocuments();
+    const totalTransacciones = await transacciones.countDocuments();
+
+    console.log("Clientes:", totalClientes);
+    console.log("Cuentas:", totalCuentas);
+    console.log("Transacciones:", totalTransacciones);
+
   } catch (error) {
     console.log(error);
   } finally {

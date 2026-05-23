@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AlertCircle } from "lucide-react";
 
 import Header from "./components/header/Header";
@@ -7,51 +7,138 @@ import AccountCard from "./components/AccountCard/AccountCard";
 import TransactionsList from "./components/TransactionsList/TransactionsList";
 import BalanceChart from "./components/BalanceChart/BalanceChart";
 import OperationForm from "./components/OperationForm/OperationForm";
+import StatusBanner from "./components/StatusBanner/StatusBanner";
 
 function App() {
   const [cuenta, setCuenta] = useState("");
-
   const [datos, setDatos] = useState(null);
-
   const [error, setError] = useState("");
+  const [estadoSistema, setEstadoSistema] = useState("online");
+  const [intentosFallidos, setIntentosFallidos] = useState(0);
+
+  useEffect(() => {
+    const verificarServidor = async () => {
+      try {
+        await fetchConTimeout(
+          "http://localhost:3000/health",
+
+          {},
+
+          3000,
+        );
+
+        /* TODO BIEN */
+
+        setEstadoSistema("online");
+
+        setIntentosFallidos(0);
+      } catch (error) {
+        /* SUMAR FALLO */
+
+        setIntentosFallidos((prev) => {
+          const nuevosIntentos = prev + 1;
+
+          /* PRIMEROS FALLOS */
+
+          if (nuevosIntentos < 3) {
+            setEstadoSistema("loading");
+          } else {
+            /* MUCHOS FALLOS */
+
+            setEstadoSistema("offline");
+          }
+
+          return nuevosIntentos;
+        });
+      }
+    };
+
+    verificarServidor();
+
+    const interval = setInterval(verificarServidor, 3000);
+
+    /* LIMPIAR */
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchConTimeout = async (url, options = {}, timeout = 5000) => {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
+
+      clearTimeout(id);
+
+      return response;
+    } catch (error) {
+      clearTimeout(id);
+      throw error;
+    }
+  };
 
   const consultarCuenta = async () => {
     try {
       setError("");
       setDatos(null);
+      setEstadoSistema("loading");
 
-      const response = await fetch(
+      const response = await fetchConTimeout(
+        `http://localhost:3000/api/cuenta/${cuenta}`,
+      );
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error("Error al parsear JSON:", parseError);
+        setError("Error en la respuesta del servidor");
+        setEstadoSistema("offline");
+        return;
+      }
+
+      if (!response.ok) {
+        setError(data.error || "Error al consultar la cuenta");
+        setEstadoSistema("online");
+        return;
+      }
+
+      setDatos(data);
+
+      setEstadoSistema("online");
+    } catch (error) {
+      console.log(error);
+
+      if (error.name === "AbortError") {
+        setError("Conexión lenta. El servidor no respondió a tiempo.");
+        setEstadoSistema("loading");
+      } else {
+        setError("Error de conexión. El servidor no está disponible.");
+        setEstadoSistema("offline");
+      }
+    }
+  };
+
+  const manejarOperacionExitosa = async () => {
+    if (!cuenta) return;
+    try {
+      const response = await fetchConTimeout(
         `http://localhost:3000/api/cuenta/${cuenta}`,
       );
 
       const data = await response.json();
 
-      if (!response.ok) {
-        setError(data.error || "Error al consultar la cuenta");
-        return;
+      if (response.ok) {
+        setDatos(data);
+        setEstadoSistema("online");
       }
-
-      setDatos(data);
     } catch (error) {
-      setError("Error de conexión. Intenta de nuevo.");
-      console.log(error);
-    }
-  };
-
-  const manejarOperacionExitosa = async () => {
-    // Reconsultar los datos completos para actualizar transacciones y saldo
-    if (cuenta) {
-      try {
-        const response = await fetch(
-          `http://localhost:3000/api/cuenta/${cuenta}`,
-        );
-        const data = await response.json();
-        if (response.ok) {
-          setDatos(data);
-        }
-      } catch (error) {
-        console.error("Error al reconsultar la cuenta:", error);
-      }
+      console.error("Error al actualizar cuenta:", error);
+      setEstadoSistema("offline");
     }
   };
 
@@ -64,6 +151,8 @@ function App() {
       }}
     >
       <Header />
+
+      <StatusBanner estado={estadoSistema} />
 
       <SearchBar
         cuenta={cuenta}
@@ -87,20 +176,24 @@ function App() {
           }}
         >
           <AlertCircle size={20} />
-          <span style={{ fontWeight: "500" }}>{error}</span>
+          <span
+            style={{
+              fontWeight: "500",
+            }}
+          >
+            {error}
+          </span>
         </div>
       )}
-
       <AccountCard datos={datos} />
-
       <OperationForm
         numeroCuenta={datos?.cuenta?.numeroCuenta}
         saldoActual={datos?.cuenta?.saldo || 0}
         onOperationSuccess={manejarOperacionExitosa}
+        setEstadoSistema={setEstadoSistema}
+        fetchConTimeout={fetchConTimeout}
       />
-
       <TransactionsList datos={datos} />
-
       <BalanceChart datos={datos} />
     </div>
   );

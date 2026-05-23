@@ -1,0 +1,22 @@
+services:
+  mongo-rs:
+    image: mongo:7
+    container_name: banco-mongo-rs
+    command:
+      - bash
+      - -lc
+      - >
+        mkdir -p /data/db1 /data/db2 /data/db3 /data/logs &&
+        mongod --replSet rsBanco --bind_ip_all --port 27017 --dbpath /data/db1 --fork --logpath /data/logs/mongo1.log &&
+        mongod --replSet rsBanco --bind_ip_all --port 27018 --dbpath /data/db2 --fork --logpath /data/logs/mongo2.log &&
+        mongod --replSet rsBanco --bind_ip_all --port 27019 --dbpath /data/db3 --fork --logpath /data/logs/mongo3.log &&
+        tail -F /data/logs/mongo1.log /data/logs/mongo2.log /data/logs/mongo3.log
+    ports:
+      - "27017:27017"
+      - "27018:27018"
+      - "27019:27019"
+    volumes:
+      - banco_mongo_rs_data:/data
+
+volumes:
+  banco_mongo_rs_data:

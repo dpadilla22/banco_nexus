@@ -102,6 +102,46 @@ Resultados esperados:
 - Existen las colecciones `clientes`, `cuentas` y `transacciones` despues de cargar datos.
 - Las relaciones basicas cliente-cuenta-transaccion no presentan referencias rotas.
 
+## Medicion de sincronizacion entre sucursales
+
+Para la parte de sincronizacion se agregaron scripts en `scripts/sucursales/`.
+
+1. Levantar MongoDB y la API:
+
+```bash
+npm start
+```
+
+2. En otra terminal, ejecutar la simulacion completa:
+
+```bash
+npm run sucursales:parallel
+```
+
+3. Opcionalmente consultar la cuenta desde una sucursal:
+
+```bash
+npm run sucursales:consulta
+```
+
+Variables disponibles:
+
+```powershell
+$env:API_URL="http://localhost:3000"
+$env:NUMERO_CUENTA="2000"
+```
+
+La simulacion ejecuta `Promise.all` por sucursal y tambien entre sucursales. Al final compara:
+
+```text
+saldo esperado = saldo inicial + depositos OK - retiros OK
+```
+
+contra el saldo final observado. Si la diferencia no es cero, se documenta como inconsistencia
+de saldo. Si varias operaciones reportan el mismo `saldoAnterior`, se documenta como colision
+por lectura concurrente.
+
+
 ## Puertos
 
 | Servicio | Puerto | Responsable |

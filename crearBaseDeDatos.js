@@ -1,14 +1,11 @@
 const { MongoClient } = require("mongodb");
 
-// Conexión actual (funciona ahorita)
-const url = "mongodb://localhost:27017";
+// const url = "mongodb://localhost:27017";
 
-// Etapa 3 - Replica Set (guardar para después)
 const replicaUrl =
   "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rsBanco";
 
-// Por ahorita usamos localhost normal
-const client = new MongoClient(url);
+  const client = new MongoClient(replicaUrl);
 
 async function crearBaseDatos() {
   try {

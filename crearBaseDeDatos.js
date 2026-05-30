@@ -2,10 +2,14 @@ const { MongoClient } = require("mongodb");
 
 // const url = "mongodb://localhost:27017";
 
-const replicaUrl =
-  "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rsBanco";
+// const replicaUrl =
+//   "mongodb://localhost:27017,localhost:27018,localhost:27019/?replicaSet=rsBanco";
 
-  const client = new MongoClient(replicaUrl);
+require("dotenv").config();
+
+const {generarNumeroCuenta} = require("./utils/numeroCuenta");
+
+const client = new MongoClient(process.env.MONGO_URI);
 
 async function crearBaseDatos() {
   try {
@@ -16,12 +20,18 @@ async function crearBaseDatos() {
     const db = client.db("nexus_banca");
 
     const clientes = db.collection("clientes");
+    await clientes.createIndex({ correo:1},{ unique:true});
     const cuentas = db.collection("cuentas");
+    await cuentas.createIndex({ numeroCuenta:1},{ unique:true});
     const transacciones = db.collection("transacciones");
+    const bitacora = db.collection("bitacora");
+    const beneficiarios =db.collection("beneficiarios");
 
     await clientes.deleteMany({});
     await cuentas.deleteMany({});
     await transacciones.deleteMany({});
+    await bitacora.deleteMany({});
+    await beneficiarios.deleteMany({});
 
     const resultadoClientes = await clientes.insertMany([
       {
@@ -100,80 +110,80 @@ async function crearBaseDatos() {
 
     const idsClientes = Object.values(resultadoClientes.insertedIds);
 
-    const resultadoCuentas = await cuentas.insertMany([
-      {
-        numeroCuenta: "2000",
-        saldo: 5000,
-        tipoCuenta: "Débito",
-        clienteId: idsClientes[0],
-      },
-      {
-        numeroCuenta: "2001",
-        saldo: 10000,
-        tipoCuenta: "Ahorro",
-        clienteId: idsClientes[1],
-      },
-      {
-        numeroCuenta: "2002",
-        saldo: 500,
-        tipoCuenta: "Ahorro",
-        clienteId: idsClientes[2],
-      },
-      {
-        numeroCuenta: "2003",
-        saldo: 15000,
-        tipoCuenta: "Débito",
-        clienteId: idsClientes[3],
-      },
-      {
-        numeroCuenta: "2004",
-        saldo: 3200,
-        tipoCuenta: "Débito",
-        clienteId: idsClientes[4],
-      },
-      {
-        numeroCuenta: "2005",
-        saldo: 8700,
-        tipoCuenta: "Ahorro",
-        clienteId: idsClientes[5],
-      },
-      {
-        numeroCuenta: "2006",
-        saldo: 4300,
-        tipoCuenta: "Débito",
-        clienteId: idsClientes[6],
-      },
-      {
-        numeroCuenta: "2007",
-        saldo: 12500,
-        tipoCuenta: "Ahorro",
-        clienteId: idsClientes[7],
-      },
-      {
-        numeroCuenta: "2008",
-        saldo: 9600,
-        tipoCuenta: "Débito",
-        clienteId: idsClientes[8],
-      },
-      {
-        numeroCuenta: "2009",
-        saldo: 7100,
-        tipoCuenta: "Ahorro",
-        clienteId: idsClientes[9],
-      },
-      {
-        numeroCuenta: "2010",
-        saldo: 13400,
-        tipoCuenta: "Débito",
-        clienteId: idsClientes[10],
-      },
-      {
-        numeroCuenta: "2011",
-        saldo: 2500,
-        tipoCuenta: "Ahorro",
-        clienteId: idsClientes[11],
-      },
-    ]);
+const resultadoCuentas = await cuentas.insertMany([
+  {
+    numeroCuenta: generarNumeroCuenta(1),
+    saldo: 5000,
+    tipoCuenta: "Débito",
+    clienteId: idsClientes[0],
+  },
+  {
+    numeroCuenta: generarNumeroCuenta(2),
+    saldo: 10000,
+    tipoCuenta: "Ahorro",
+    clienteId: idsClientes[1],
+  },
+  {
+    numeroCuenta: generarNumeroCuenta(3),
+    saldo: 500,
+    tipoCuenta: "Ahorro",
+    clienteId: idsClientes[2],
+  },
+  {
+    numeroCuenta: generarNumeroCuenta(4),
+    saldo: 15000,
+    tipoCuenta: "Débito",
+    clienteId: idsClientes[3],
+  },
+  {
+    numeroCuenta: generarNumeroCuenta(5),
+    saldo: 3200,
+    tipoCuenta: "Débito",
+    clienteId: idsClientes[4],
+  },
+  {
+    numeroCuenta: generarNumeroCuenta(6),
+    saldo: 8700,
+    tipoCuenta: "Ahorro",
+    clienteId: idsClientes[5],
+  },
+  {
+    numeroCuenta: generarNumeroCuenta(7),
+    saldo: 4300,
+    tipoCuenta: "Débito",
+    clienteId: idsClientes[6],
+  },
+  {
+    numeroCuenta: generarNumeroCuenta(8),
+    saldo: 12500,
+    tipoCuenta: "Ahorro",
+    clienteId: idsClientes[7],
+  },
+  {
+    numeroCuenta: generarNumeroCuenta(9),
+    saldo: 9600,
+    tipoCuenta: "Débito",
+    clienteId: idsClientes[8],
+  },
+  {
+    numeroCuenta: generarNumeroCuenta(10),
+    saldo: 7100,
+    tipoCuenta: "Ahorro",
+    clienteId: idsClientes[9],
+  },
+  {
+    numeroCuenta: generarNumeroCuenta(11),
+    saldo: 13400,
+    tipoCuenta: "Débito",
+    clienteId: idsClientes[10],
+  },
+  {
+    numeroCuenta: generarNumeroCuenta(12),
+    saldo: 2500,
+    tipoCuenta: "Ahorro",
+    clienteId: idsClientes[11],
+  },
+]);
 
     const idsCuentas = Object.values(resultadoCuentas.insertedIds);
 
@@ -262,17 +272,62 @@ async function crearBaseDatos() {
         sucursal: "Mulegé",
         fecha: new Date(),
       },
+      
     ]);
-
+await bitacora.insertMany([
+  {
+    accion: "CONSULTA",
+    usuarioId: idsClientes[0],
+    estado: "EXITOSO",
+    detalle: "Consulta de saldo",
+    fecha: new Date(),
+  },
+  {
+    accion: "LOGIN",
+    usuarioId: idsClientes[1],
+    estado: "EXITOSO",
+    detalle: "Inicio de sesión",
+    fecha: new Date(),
+  },
+  {
+    accion: "TRANSFERENCIA",
+    usuarioId: idsClientes[2],
+    estado: "PENDIENTE",
+    detalle:
+      "Transferencia de prueba",
+    fecha: new Date(),
+  }
+]);
+await beneficiarios.insertMany([
+  {
+    usuarioId: idsClientes[0],
+    alias: "Masha",
+    cuentaDestino: generarNumeroCuenta(2)
+  },
+  {
+    usuarioId: idsClientes[1],
+    alias: "Bernardo",
+    cuentaDestino: generarNumeroCuenta(3)
+  },
+  {
+    usuarioId: idsClientes[2],
+    alias: "Chiwis",
+    cuentaDestino: generarNumeroCuenta(4)
+  }
+]);
     console.log("Datos insertados");
 
     const totalClientes = await clientes.countDocuments();
     const totalCuentas = await cuentas.countDocuments();
     const totalTransacciones = await transacciones.countDocuments();
+    const totalBitacora =await bitacora.countDocuments();
+    const totalBeneficiarios =await beneficiarios.countDocuments();
 
     console.log("Clientes:", totalClientes);
     console.log("Cuentas:", totalCuentas);
     console.log("Transacciones:", totalTransacciones);
+    console.log("Bitacora:", totalBitacora);
+    console.log("Beneficiarios:",totalBeneficiarios);
 
   } catch (error) {
     console.log(error);

@@ -12,7 +12,7 @@ let db;
 
 const conectar = async () => {
   await client.connect();
-  db = client.db('nexus_banca');
+  db = client.db(process.env.DB_NAME);
   console.log('✔ Conectado');
 };
 

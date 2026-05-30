@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const { getDb } = require("../config/db");
 
-
 const validarMonto = (monto) => {
   if (monto === undefined || monto === null) return "El monto es requerido";
   if (typeof monto !== "number") return "El monto debe ser un número";
@@ -17,7 +16,6 @@ const buscarCuenta = async (db, numeroCuenta) => {
     .collection("cuentas")
     .findOne({ numeroCuenta: String(numeroCuenta) });
 };
-
 
 router.post("/deposito", async (req, res) => {
   try {
@@ -48,6 +46,7 @@ router.post("/deposito", async (req, res) => {
       cuentaId: cuenta._id,
       tipo: "Depósito",
       monto,
+      sucursal: "Principal",
       fecha: new Date(),
     });
 
@@ -104,6 +103,7 @@ router.post("/retiro", async (req, res) => {
       cuentaId: cuenta._id,
       tipo: "Retiro",
       monto,
+      sucursal: "Principal",
       fecha: new Date(),
     });
 

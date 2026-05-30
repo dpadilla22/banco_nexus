@@ -1,0 +1,68 @@
+.status-banner {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 999;
+    backdrop-filter: blur(10px);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+
+}
+
+.status-banner.online {
+    background:
+        rgba(76, 175, 80, 0.12);
+    color: #2E7D32;
+    border:
+        1px solid rgba(76, 175, 80, 0.2);
+}
+
+.status-banner.loading {
+    background:
+        rgba(255, 193, 7, 0.12);
+    color: #F57C00;
+    border:
+        1px solid rgba(255, 193, 7, 0.2);
+
+}
+
+.status-banner.offline {
+    background:
+        rgba(244, 67, 54, 0.12);
+
+    color: #C62828;
+    border:
+        1px solid rgba(244, 67, 54, 0.2);
+}
+
+.spin {
+    animation:
+        spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .status-banner {
+        top: 16px;
+        right: 16px;
+        font-size: 13px;
+        padding: 10px 14px;
+    }
+}

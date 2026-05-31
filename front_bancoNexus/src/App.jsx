@@ -8,6 +8,7 @@ import TransactionsList from "./components/TransactionsList/TransactionsList";
 import BalanceChart from "./components/BalanceChart/BalanceChart";
 import OperationForm from "./components/OperationForm/OperationForm";
 import StatusBanner from "./components/StatusBanner/StatusBanner";
+import Auth from "./pages/Auth/Auth";
 
 function App() {
   const [cuenta, setCuenta] = useState("");
@@ -15,6 +16,7 @@ function App() {
   const [error, setError] = useState("");
   const [estadoSistema, setEstadoSistema] = useState("online");
   const [intentosFallidos, setIntentosFallidos] = useState(0);
+  const [usuario, setUsuario] = useState(null);
 
   useEffect(() => {
     const verificarServidor = async () => {
@@ -141,6 +143,11 @@ function App() {
       setEstadoSistema("offline");
     }
   };
+
+  if (!usuario) {
+  return <Auth setUsuario={setUsuario} />;
+}
+
 
   return (
     <div

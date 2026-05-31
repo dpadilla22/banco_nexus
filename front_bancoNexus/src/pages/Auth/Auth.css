@@ -1,0 +1,298 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+}
+
+.auth-container {
+    min-height: 100vh;
+    background: #e8e8f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 900px;
+    min-height: 520px;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+}
+
+/* ---------- FORMULARIOS ---------- */
+
+.auth-forms {
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 60px;
+    z-index: 1;
+}
+
+.form-box {
+    width: 100%;
+    max-width: 340px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-box h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* ---------- PANEL AZUL ---------- */
+
+.overlay-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 50%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+
+    background: #0a0a1a;
+
+    z-index: 2;
+}
+
+.overlay-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(#0000d4, #0000d4) 0% 33% / 50% 20% no-repeat,
+        linear-gradient(#3037ff, #3037ff) 25% 50% / 50% 20% no-repeat,
+        linear-gradient(#1c00b8, #1c00b8) 50% 67% / 50% 20% no-repeat,
+        linear-gradient(#6360ff, #6360ff) 0% 67% / 25% 33% no-repeat,
+        linear-gradient(#8086ff, #8086ff) 50% 33% / 25% 20% no-repeat,
+        linear-gradient(#070090, #070090) 75% 0% / 25% 33% no-repeat,
+        linear-gradient(#3e20e8, #3e20e8) 0% 0% / 25% 20% no-repeat;
+
+    opacity: 0.9;
+}
+
+.overlay-content {
+    position: relative;
+    z-index: 2;
+
+    text-align: center;
+    color: white;
+
+    padding: 40px;
+}
+
+.overlay-content h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.overlay-content p {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-bottom: 24px;
+}
+
+.switch-btn {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+
+    color: white;
+
+    padding: 12px 32px;
+
+    border-radius: 14px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+}
+
+.switch-btn:hover {
+    background: white;
+    color: #1a237e;
+}
+
+/* ---------- CAMPOS ---------- */
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+}
+
+.input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    color: #3037ff;
+}
+
+.input-wrap input {
+    width: 100%;
+
+    padding: 14px 18px;
+    padding-left: 42px;
+    padding-right: 46px;
+
+    border: none;
+    border-radius: 14px;
+
+    background: #f2f2f2;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition: all 0.2s ease;
+}
+
+.input-wrap input:focus {
+    box-shadow: 0 0 0 2px #3037ff;
+}
+
+.input-wrap input::placeholder {
+    color: #aaa;
+}
+
+/* ---------- BOTON SUBMIT ---------- */
+
+.submit-btn {
+    width: 100%;
+
+    border: none;
+
+    border-radius: 14px;
+
+    padding: 14px;
+
+    background: linear-gradient(135deg, #1a237e, #3646ef);
+
+    color: white;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+
+    margin-top: 10px;
+}
+
+.submit-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.input-error {
+    border: 2px solid #ef4444 !important;
+    background: #fff5f5 !important;
+}
+
+.error-text {
+    color: #ef4444;
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: -4px;
+}
+
+.password-toggle {
+    position: absolute;
+
+    right: 14px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    border: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    color: #64748b;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition: 0.2s ease;
+}
+
+.password-toggle:hover {
+    color: #1a237e;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 768px) {
+    .auth-card {
+        min-height: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .overlay-panel {
+        position: relative;
+        width: 100%;
+        height: 220px;
+        transform: none !important;
+    }
+
+    .auth-forms {
+        position: relative;
+        width: 100%;
+        height: auto;
+        padding: 30px 20px;
+        justify-content: center !important;
+    }
+
+    .form-box {
+        max-width: 100%;
+    }
+}

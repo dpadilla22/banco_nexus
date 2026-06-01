@@ -34,22 +34,23 @@ router.post("/deposito", async (req, res) => {
         .json({ error: `Cuenta ${numeroCuenta} no encontrada` });
     }
 
-    // !!CHECA AESTO JAVI!! -Ale
-    // Aqui estamos leyendo el saldo, calculando en JS y luego guardando con $set,si llegan dos depositos al mismo tiempo,
-    //  uno puede pisar al otro asi que mejor usar $inc: { saldo: monto } para que Mongo lo haga atomico
-    const nuevoSaldo = cuenta.saldo + monto;
-    //Solo agregué esto ATT: Mich
     const sucursal = "Principal";
+    const depositoResult = await db.collection("cuentas").findOneAndUpdate(
+      { numeroCuenta: String(numeroCuenta) },
+      { $inc: { saldo: monto } },
+      { returnDocument: "after" },
+    );
 
-    await db
-      .collection("cuentas")
-      .updateOne(
-        { numeroCuenta: String(numeroCuenta) },
-        { $set: { saldo: nuevoSaldo } },
-      );
+    if (!depositoResult.value) {
+      return res
+        .status(404)
+        .json({ error: `Cuenta ${numeroCuenta} no encontrada` });
+    }
+
+    const actualizado = depositoResult.value;
 
     await db.collection("transacciones").insertOne({
-      cuentaId: cuenta._id,
+      cuentaId: actualizado._id,
       tipo: "Depósito",
       monto,
       sucursal,
@@ -58,14 +59,14 @@ router.post("/deposito", async (req, res) => {
 
     await db.collection("bitacora").insertOne({
       accion: "DEPOSITO",
-      usuarioId: cuenta.clienteId,
+      usuarioId: actualizado.clienteId,
       estado: "EXITOSO",
       detalle: {
         numeroCuenta,
         monto,
         sucursal,
         saldoAnterior: cuenta.saldo,
-        saldoActual: nuevoSaldo,
+        saldoActual: actualizado.saldo,
       },
       fecha: new Date(),
     });
@@ -75,7 +76,7 @@ router.post("/deposito", async (req, res) => {
       numeroCuenta,
       montoDepositado: monto,
       saldoAnterior: cuenta.saldo,
-      saldoActual: nuevoSaldo,
+      saldoActual: actualizado.saldo,
     });
   } catch (error) {
     console.error(error);
@@ -102,7 +103,14 @@ router.post("/retiro", async (req, res) => {
         .json({ error: `Cuenta ${numeroCuenta} no encontrada` });
     }
 
-    if (cuenta.saldo < monto) {
+    const sucursal = "Principal";
+    const retiroResult = await db.collection("cuentas").findOneAndUpdate(
+      { numeroCuenta: String(numeroCuenta), saldo: { $gte: monto } },
+      { $inc: { saldo: -monto } },
+      { returnDocument: "after" },
+    );
+
+    if (!retiroResult.value) {
       return res.status(400).json({
         error: "Saldo insuficiente",
         saldoActual: cuenta.saldo,
@@ -111,22 +119,10 @@ router.post("/retiro", async (req, res) => {
       });
     }
 
-    // !!CHECA AESTO JAVI!! -Ale
-    // Esta validacion de saldo pasa antes del update, pero entre este if y el $set
-    // puede entrar otro retiro y dejar el saldo mal. Para corregirlo, el update
-    // deberia filtrar con saldo: { $gte: monto } y usar $inc: { saldo: -monto }.
-    const nuevoSaldo = cuenta.saldo - monto;
-    //Solo agregué esto  ATT: Mich
-    const sucursal = "Principal";
-    await db
-      .collection("cuentas")
-      .updateOne(
-        { numeroCuenta: String(numeroCuenta) },
-        { $set: { saldo: nuevoSaldo } },
-      );
+    const actualizado = retiroResult.value;
 
     await db.collection("transacciones").insertOne({
-      cuentaId: cuenta._id,
+      cuentaId: actualizado._id,
       tipo: "Retiro",
       monto,
       sucursal,
@@ -135,14 +131,14 @@ router.post("/retiro", async (req, res) => {
 
     await db.collection("bitacora").insertOne({
       accion: "RETIRO",
-      usuarioId: cuenta.clienteId,
+      usuarioId: actualizado.clienteId,
       estado: "EXITOSO",
       detalle: {
         numeroCuenta,
         monto,
         sucursal,
         saldoAnterior: cuenta.saldo,
-        saldoActual: nuevoSaldo,
+        saldoActual: actualizado.saldo,
       },
       fecha: new Date(),
     });
@@ -152,7 +148,7 @@ router.post("/retiro", async (req, res) => {
       numeroCuenta,
       montoRetirado: monto,
       saldoAnterior: cuenta.saldo,
-      saldoActual: nuevoSaldo,
+      saldoActual: actualizado.saldo,
     });
   } catch (error) {
     console.error(error);

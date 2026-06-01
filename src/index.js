@@ -5,12 +5,23 @@ const cors = require("cors");
 const authMiddleware = require("./middlewares/auth");
 
 const app = express();
-// !!CHECA AESTO JAVI!! -Ale
-// CORS esta abierto, luego cambiar a CORS_ORIGIN 
-app.use(cors());
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim())
+  : null;
+
+app.use(cors(allowedOrigins ? { origin: allowedOrigins } : {}));
 app.use(express.json());
 
+const validateEnvironment = () => {
+  const required = ["MONGO_URI", "DB_NAME", "JWT_SECRET", "JWT_EXPIRES"];
+  const missing = required.filter((name) => !process.env[name]);
+  if (missing.length) {
+    throw new Error(`Faltan variables de entorno requeridas: ${missing.join(", ")}`);
+  }
+};
+
 const iniciar = async () => {
+  validateEnvironment();
   await conectar();
 
   app.use("/api/auth", require("./routes/auth"));

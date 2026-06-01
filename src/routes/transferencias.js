@@ -10,23 +10,18 @@ const { ObjectId } = require('mongodb');
 router.post('/', async (req, res) => {
   const { cuentaDestino, monto, mensaje } = req.body;
   const db = getDb();
-  // !!CHECA AESTO JAVI!! -Ale
-  // Si una validacion falla antes de startTransaction(), el catch no deberia intentar abortar una transaccion
-  // que nunca iniciom metele una bandera
-  const session = db.client.startSession(); // sesión para transacción atómica
+  const session = db.client.startSession();
+  let transactionStarted = false;
 
   try {
-    // 1. Validar formato cuenta destino
     if (!cuentaValida(cuentaDestino)) {
       return res.status(400).json({ error: 'Formato de cuenta destino inválido' });
     }
 
-    // 2. Validar monto
     if (!monto || typeof monto !== 'number' || monto <= 0) {
       return res.status(400).json({ error: 'Monto inválido' });
     }
 
-    // 3. Obtener cuenta origen del token
     const clienteId = new ObjectId(req.cliente.clienteId);
     const cuentaOrigen = await db.collection('cuentas')
       .findOne({ clienteId });
@@ -34,15 +29,10 @@ router.post('/', async (req, res) => {
       return res.status(404).json({ error: 'Cuenta origen no encontrada' });
     }
 
-    // 4. Verificar que no sea su propia cuenta
     if (cuentaOrigen.numeroCuenta === cuentaDestino) {
       return res.status(400).json({ error: 'No puedes transferirte a ti mismo' });
     }
 
-    // 5. Verificar saldo suficiente
-    // !!CHECA AESTO JAVI!! -Ale
-    // Esta revision de saldo todavia tiene bug, el update de la cuenta origen deberia incluir saldo: { $gte: monto } y revisar
-    // modifiedCount antes de acreditar al destino  
     if (cuentaOrigen.saldo < monto) {
       return res.status(400).json({
         error:           'Saldo insuficiente',
@@ -51,27 +41,32 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // 6. Buscar cuenta destino
     const cuentaDestinoDoc = await db.collection('cuentas')
       .findOne({ numeroCuenta: cuentaDestino });
     if (!cuentaDestinoDoc) {
       return res.status(404).json({ error: 'Cuenta destino no encontrada' });
     }
 
-    // 7. Transacción atómica
     session.startTransaction();
+    transactionStarted = true;
 
-    // !!CHECA AESTO JAVI!! -Ale
-    // Este descuento deberia usar el _id de la cuenta y validar saldo suficiente
-    // en el mismo updatepara evitar que dos transferencias dejen saldo negativo
-    await db.collection('cuentas').updateOne(
-      { numeroCuenta: cuentaOrigen.numeroCuenta },
+    const origenUpdate = await db.collection('cuentas').updateOne(
+      { _id: cuentaOrigen._id, saldo: { $gte: monto } },
       { $inc: { saldo: -monto } },
       { session }
     );
 
+    if (origenUpdate.modifiedCount !== 1) {
+      await session.abortTransaction();
+      return res.status(400).json({
+        error: 'Saldo insuficiente',
+        saldoActual: cuentaOrigen.saldo,
+        montoSolicitado: monto,
+      });
+    }
+
     await db.collection('cuentas').updateOne(
-      { numeroCuenta: cuentaDestino },
+      { _id: cuentaDestinoDoc._id },
       { $inc: { saldo: monto } },
       { session }
     );
@@ -96,9 +91,6 @@ router.post('/', async (req, res) => {
       fecha
     }, { session });
 
-    await session.commitTransaction();
-
-    // 8. Bitácora
     await db.collection('bitacora').insertOne({
       accion:    'TRANSFERENCIA',
       usuarioId: clienteId,
@@ -110,7 +102,9 @@ router.post('/', async (req, res) => {
         mensaje
       },
       fecha
-    });
+    }, { session });
+
+    await session.commitTransaction();
 
     res.json({
       mensaje:       'Transferencia realizada exitosamente',
@@ -121,7 +115,9 @@ router.post('/', async (req, res) => {
     });
 
   } catch (error) {
-    await session.abortTransaction(); // revertir si algo falló
+    if (transactionStarted) {
+      await session.abortTransaction();
+    }
     console.error(error);
     res.status(500).json({ error: 'Error interno del servidor' });
   } finally {

@@ -5,6 +5,15 @@ const jwt = require("jsonwebtoken");
 const { getDb } = require("../config/db");
 const { generarNumeroCuenta, cuentaValida } = require('../../utils/numeroCuenta');
 
+const getNextCuentaSequence = async (db) => {
+  const result = await db.collection('counters').findOneAndUpdate(
+    { _id: 'cuentas' },
+    { $inc: { seq: 1 } },
+    { upsert: true, returnDocument: 'after' },
+  );
+  return result.value.seq;
+};
+
 // ──────────────────────────────────────────────────────────────────────────────────
 //                                      REGISTRO
 // ──────────────────────────────────────────────────────────────────────────────────
@@ -35,12 +44,8 @@ router.post("/registro", async (req, res) => {
 
     const clienteId = resultado.insertedId;
 
-    // !!CHECA AESTO JAVI!! -Ale
-    // countDocuments()puede generqr duplicados si
-    // dos usuarios se registran al mismo tiempo, so lo mas seguro es un contador
-    // atomico en Mongo o un indezçx unico en numeroCuenta con reintento 
-    const totalCuentas = await db.collection("cuentas").countDocuments();
-    const numeroCuenta = generarNumeroCuenta(totalCuentas + 1);
+    const secuenciaCuenta = await getNextCuentaSequence(db);
+    const numeroCuenta = generarNumeroCuenta(secuenciaCuenta);
 
     await db.collection("cuentas").insertOne({
       numeroCuenta,
@@ -103,14 +108,23 @@ router.post("/login", async (req, res) => {
       .collection("cuentas")
       .findOne({ clienteId: cliente._id });
 
-    // !!CHECA AESTO JAVI!! -Ale
-    // Antes de firmar tokens hay que validar al arrancar que JWT_SECRET exista
-    // y no sea el valor de ejemplo. Si falta, la API no deberia iniciar.
+    if (!cuenta) {
+      console.error(`Cuenta no encontrada para cliente ${cliente._id}`);
+      await db.collection("bitacora").insertOne({
+        accion: "LOGIN",
+        usuarioId: cliente._id,
+        estado: "FALLIDO",
+        detalle: "Cuenta no encontrada para el cliente",
+        fecha: new Date(),
+      });
+      return res.status(500).json({ error: "Error interno: cuenta no encontrada" });
+    }
+
     const token = jwt.sign(
       {
         clienteId: cliente._id,
         correo: cliente.correo,
-        numeroCuenta: cuenta?.numeroCuenta,
+        numeroCuenta: cuenta.numeroCuenta,
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES },
@@ -124,15 +138,12 @@ router.post("/login", async (req, res) => {
       fecha: new Date(),
     });
 
-    // !!CHECA AESTO JAVI!! -Ale
-    // Si por algun dato roto no existe cliente o cuenta, esto truena con 500.
-    // Mejor responder 404/controlado antes de usar cliente.nombre o cuenta.saldo.
     res.json({
       token,
       cliente: {
         nombre: cliente.nombre,
         correo: cliente.correo,
-        numeroCuenta: cuenta?.numeroCuenta,
+        numeroCuenta: cuenta.numeroCuenta,
       },
     });
   } catch (error) {
@@ -156,9 +167,17 @@ router.get("/perfil", require("../middlewares/auth"), async (req, res) => {
         { projection: { contrasena: 0 } },
       );
 
+    if (!cliente) {
+      return res.status(404).json({ error: "Cliente no encontrado" });
+    }
+
     const cuenta = await db.collection("cuentas").findOne({
       clienteId: new ObjectId(req.cliente.clienteId),
     });
+
+    if (!cuenta) {
+      return res.status(404).json({ error: "Cuenta no encontrada" });
+    }
 
     res.json({
       nombre: cliente.nombre,

@@ -3,7 +3,9 @@ const router  = express.Router();
 const { getDb } = require('../config/db');
 const { ObjectId } = require('mongodb');
 
-// ─── GET /api/bitacora ────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────────
+//                                   BITÁCORA
+// ──────────────────────────────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
     const clienteId = new ObjectId(req.cliente.clienteId);
@@ -25,7 +27,9 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ─── GET /api/bitacora/todos ──────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────────
+//                              BITACORA (TODOS)
+// ──────────────────────────────────────────────────────────────────────────────────
 router.get('/todos', async (req, res) => {
   try {
     const db = getDb();

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, Info, Phone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import "./Auth.css";
 
@@ -8,13 +8,21 @@ export default function Auth({ setUsuario }) {
 
   const [formulario, setFormulario] = useState({
     nombre: "",
+    curp: "",
+    telefono: "",
     correo: "",
     password: "",
   });
 
   const [errores, setErrores] = useState({});
+  const [errorGeneral, setErrorGeneral] = useState("");
   const [mostrarPasswordLogin, setMostrarPasswordLogin] = useState(false);
   const [mostrarPasswordRegistro, setMostrarPasswordRegistro] = useState(false);
+
+  const limpiarMensajes = () => {
+    setErrores({});
+    setErrorGeneral("");
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,6 +36,8 @@ export default function Auth({ setUsuario }) {
       ...prev,
       [name]: "",
     }));
+
+    setErrorGeneral("");
   };
 
   const validarFormulario = () => {
@@ -37,6 +47,26 @@ export default function Auth({ setUsuario }) {
 
     if (esRegistro && !formulario.nombre.trim()) {
       nuevosErrores.nombre = "El nombre es obligatorio";
+    }
+
+    if (esRegistro && !formulario.curp.trim()) {
+      nuevosErrores.curp = "La CURP es obligatoria";
+    }
+
+    if (esRegistro && formulario.curp && formulario.curp.length !== 18) {
+      nuevosErrores.curp = "La CURP debe tener 18 caracteres";
+    }
+
+    if (esRegistro && !formulario.telefono.trim()) {
+      nuevosErrores.telefono = "El teléfono es obligatorio";
+    }
+
+    if (
+      esRegistro &&
+      formulario.telefono &&
+      !/^\d{10}$/.test(formulario.telefono)
+    ) {
+      nuevosErrores.telefono = "Debe contener 10 dígitos";
     }
 
     if (!formulario.correo.trim()) {
@@ -56,26 +86,97 @@ export default function Auth({ setUsuario }) {
     return Object.keys(nuevosErrores).length === 0;
   };
 
-  const iniciarSesion = (e) => {
+  const iniciarSesion = async (e) => {
     e.preventDefault();
 
-    if (!validarFormulario()) return;
+    setErrorGeneral("");
 
-    setUsuario({
-      nombre: "Usuario",
-      correo: formulario.correo,
-    });
+    if (!validarFormulario()) {
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          correo: formulario.correo,
+          contrasena: formulario.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorGeneral(data.error || "Correo o contraseña incorrectos");
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+
+      localStorage.setItem("usuario", JSON.stringify(data.cliente));
+
+      setUsuario(data.cliente);
+    } catch (error) {
+      console.error(error);
+
+      setErrorGeneral("No fue posible conectar con el servidor");
+    }
   };
 
-  const registrarse = (e) => {
+  const registrarse = async (e) => {
     e.preventDefault();
 
-    if (!validarFormulario()) return;
+    limpiarMensajes();
 
-    setUsuario({
-      nombre: formulario.nombre,
-      correo: formulario.correo,
-    });
+    if (!validarFormulario()) {
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/registro", {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          nombre: formulario.nombre,
+          curp: formulario.curp,
+          telefono: formulario.telefono,
+          correo: formulario.correo,
+          contrasena: formulario.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorGeneral(data.error || "Error al registrarse");
+        return;
+      }
+
+      alert(
+        `Cuenta creada correctamente.\nNúmero de cuenta: ${data.numeroCuenta}`,
+      );
+
+      setEsRegistro(false);
+
+      setFormulario({
+        nombre: "",
+        curp: "",
+        telefono: "",
+        correo: "",
+        password: "",
+      });
+    } catch (error) {
+      console.error(error);
+
+      setErrorGeneral("No fue posible conectar con el servidor");
+    }
   };
 
   return (
@@ -98,90 +199,135 @@ export default function Auth({ setUsuario }) {
                 exit={{ opacity: 0, x: 80 }}
                 transition={{ duration: 0.5 }}
               >
-                <h2>Registro</h2>
+                <div className="form-header">
+                  <h2>Registro</h2>
 
-                <div className="field">
-                  <label htmlFor="nombre">Nombre</label>
-
-                  <div className="input-wrap">
-                    <User size={16} className="input-icon" />
-
-                    <input
-                      id="nombre"
-                      type="text"
-                      name="nombre"
-                      placeholder="Ingrese su nombre"
-                      onChange={handleChange}
-                      value={formulario.nombre}
-                      className={errores.nombre ? "input-error" : ""}
-                    />
-                  </div>
-
-                  {errores.nombre && (
-                    <span className="error-text">{errores.nombre}</span>
-                  )}
-                </div>
-
-                <div className="field">
-                  <label htmlFor="correo-r">Correo</label>
-
-                  <div className="input-wrap">
-                    <Mail size={16} className="input-icon" />
-
-                    <input
-                      id="correo-r"
-                      type="email"
-                      name="correo"
-                      placeholder="ejemplo@correo.com"
-                      onChange={handleChange}
-                      value={formulario.correo}
-                      className={errores.correo ? "input-error" : ""}
-                    />
-                  </div>
-
-                  {errores.correo && (
-                    <span className="error-text">{errores.correo}</span>
-                  )}
-                </div>
-
-                <div className="field">
-                  <label htmlFor="password-r">Contraseña</label>
-
-                  <div className="input-wrap">
-                    <Lock size={16} className="input-icon" />
-
-                    <input
-                      id="password-r"
-                      type={mostrarPasswordRegistro ? "text" : "password"}
-                      name="password"
-                      placeholder="Crea una contraseña"
-                      onChange={handleChange}
-                      value={formulario.password}
-                      className={errores.password ? "input-error" : ""}
-                    />
-                    <button
-                      type="button"
-                      className="password-toggle"
-                      onClick={() =>
-                        setMostrarPasswordRegistro(!mostrarPasswordRegistro)
-                      }
+                  {errorGeneral && (
+                    <div
+                      className="error-global"
+                      style={{ marginBottom: "10px" }}
                     >
-                      {mostrarPasswordRegistro ? (
-                        <EyeOff size={18} />
-                      ) : (
-                        <Eye size={18} />
-                      )}
-                    </button>
-                  </div>
-
-                  {errores.password && (
-                    <span className="error-text">{errores.password}</span>
+                      <Info size={18} />
+                      <span>{errorGeneral}</span>
+                    </div>
                   )}
                 </div>
 
-                <button type="submit" className="submit-btn">
-                  Registrarse
-                </button>
+                {/* Los campos se quedan dentro del scroll de manera independiente */}
+                <div className="form-scroll">
+                  <div className="field">
+                    <label htmlFor="nombre">Nombre</label>
+                    <div className="input-wrap">
+                      <User size={16} className="input-icon" />
+                      <input
+                        id="nombre"
+                        type="text"
+                        name="nombre"
+                        placeholder="Ingrese su nombre"
+                        onChange={handleChange}
+                        value={formulario.nombre}
+                        className={errores.nombre ? "input-error" : ""}
+                      />
+                    </div>
+                    {errores.nombre && (
+                      <span className="error-text">{errores.nombre}</span>
+                    )}
+                  </div>
+
+                  <div className="field">
+                    <label>CURP</label>
+                    <div className="input-wrap">
+                      <User size={16} className="input-icon" />
+                      <input
+                        type="text"
+                        name="curp"
+                        value={formulario.curp}
+                        onChange={handleChange}
+                        maxLength={18}
+                        placeholder="Ingresa tu CURP"
+                        className={errores.curp ? "input-error" : ""}
+                      />
+                    </div>
+                    {errores.curp && (
+                      <span className="error-text">{errores.curp}</span>
+                    )}
+                  </div>
+
+                  <div className="field">
+                    <label>Teléfono</label>
+                    <div className="input-wrap">
+                      <Phone size={16} className="input-icon" />
+                      <input
+                        type="text"
+                        name="telefono"
+                        value={formulario.telefono}
+                        onChange={handleChange}
+                        maxLength={10}
+                        placeholder="8336153976"
+                        className={errores.telefono ? "input-error" : ""}
+                      />
+                    </div>
+                    {errores.telefono && (
+                      <span className="error-text">{errores.telefono}</span>
+                    )}
+                  </div>
+
+                  <div className="field">
+                    <label htmlFor="correo-r">Correo</label>
+                    <div className="input-wrap">
+                      <Mail size={16} className="input-icon" />
+                      <input
+                        id="correo-r"
+                        type="email"
+                        name="correo"
+                        placeholder="ejemplo@correo.com"
+                        onChange={handleChange}
+                        value={formulario.correo}
+                        className={errores.correo ? "input-error" : ""}
+                      />
+                    </div>
+                    {errores.correo && (
+                      <span className="error-text">{errores.correo}</span>
+                    )}
+                  </div>
+
+                  <div className="field">
+                    <label htmlFor="password-r">Contraseña</label>
+                    <div className="input-wrap">
+                      <Lock size={16} className="input-icon" />
+                      <input
+                        id="password-r"
+                        type={mostrarPasswordRegistro ? "text" : "password"}
+                        name="password"
+                        placeholder="Crea una contraseña"
+                        onChange={handleChange}
+                        value={formulario.password}
+                        className={errores.password ? "input-error" : ""}
+                      />
+                      <button
+                        type="button"
+                        className="password-toggle"
+                        onClick={() =>
+                          setMostrarPasswordRegistro(!mostrarPasswordRegistro)
+                        }
+                      >
+                        {mostrarPasswordRegistro ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
+                    {errores.password && (
+                      <span className="error-text">{errores.password}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="form-footer">
+                  <button type="submit" className="submit-btn">
+                    Registrarse
+                  </button>
+                </div>
               </motion.form>
             ) : (
               <motion.form
@@ -194,6 +340,13 @@ export default function Auth({ setUsuario }) {
                 transition={{ duration: 0.5 }}
               >
                 <h2>Iniciar Sesión</h2>
+
+                {errorGeneral && (
+                  <div className="error-global">
+                    <Info size={18} />
+                    <span>{errorGeneral}</span>
+                  </div>
+                )}
 
                 <div className="field">
                   <label htmlFor="correo">Correo</label>
@@ -283,10 +436,12 @@ export default function Auth({ setUsuario }) {
               onClick={() => {
                 setEsRegistro(!esRegistro);
 
-                setErrores({});
+                limpiarMensajes();
 
                 setFormulario({
                   nombre: "",
+                  curp: "",
+                  telefono: "",
                   correo: "",
                   password: "",
                 });

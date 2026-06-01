@@ -19,6 +19,14 @@ function App() {
   const [usuario, setUsuario] = useState(null);
 
   useEffect(() => {
+    const usuarioGuardado = localStorage.getItem("usuario");
+
+    if (usuarioGuardado) {
+      setUsuario(JSON.parse(usuarioGuardado));
+    }
+  }, []);
+
+  useEffect(() => {
     const verificarServidor = async () => {
       try {
         await fetchConTimeout(
@@ -28,8 +36,6 @@ function App() {
 
           3000,
         );
-
-        /* TODO BIEN */
 
         setEstadoSistema("online");
 
@@ -145,9 +151,8 @@ function App() {
   };
 
   if (!usuario) {
-  return <Auth setUsuario={setUsuario} />;
-}
-
+    return <Auth setUsuario={setUsuario} />;
+  }
 
   return (
     <div

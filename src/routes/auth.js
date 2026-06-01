@@ -35,6 +35,10 @@ router.post("/registro", async (req, res) => {
 
     const clienteId = resultado.insertedId;
 
+    // !!CHECA AESTO JAVI!! -Ale
+    // countDocuments()puede generqr duplicados si
+    // dos usuarios se registran al mismo tiempo, so lo mas seguro es un contador
+    // atomico en Mongo o un indezçx unico en numeroCuenta con reintento 
     const totalCuentas = await db.collection("cuentas").countDocuments();
     const numeroCuenta = generarNumeroCuenta(totalCuentas + 1);
 
@@ -99,6 +103,9 @@ router.post("/login", async (req, res) => {
       .collection("cuentas")
       .findOne({ clienteId: cliente._id });
 
+    // !!CHECA AESTO JAVI!! -Ale
+    // Antes de firmar tokens hay que validar al arrancar que JWT_SECRET exista
+    // y no sea el valor de ejemplo. Si falta, la API no deberia iniciar.
     const token = jwt.sign(
       {
         clienteId: cliente._id,
@@ -117,6 +124,9 @@ router.post("/login", async (req, res) => {
       fecha: new Date(),
     });
 
+    // !!CHECA AESTO JAVI!! -Ale
+    // Si por algun dato roto no existe cliente o cuenta, esto truena con 500.
+    // Mejor responder 404/controlado antes de usar cliente.nombre o cuenta.saldo.
     res.json({
       token,
       cliente: {

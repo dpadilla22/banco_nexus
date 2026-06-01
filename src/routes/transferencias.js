@@ -10,6 +10,9 @@ const { ObjectId } = require('mongodb');
 router.post('/', async (req, res) => {
   const { cuentaDestino, monto, mensaje } = req.body;
   const db = getDb();
+  // !!CHECA AESTO JAVI!! -Ale
+  // Si una validacion falla antes de startTransaction(), el catch no deberia intentar abortar una transaccion
+  // que nunca iniciom metele una bandera
   const session = db.client.startSession(); // sesión para transacción atómica
 
   try {
@@ -37,6 +40,9 @@ router.post('/', async (req, res) => {
     }
 
     // 5. Verificar saldo suficiente
+    // !!CHECA AESTO JAVI!! -Ale
+    // Esta revision de saldo todavia tiene bug, el update de la cuenta origen deberia incluir saldo: { $gte: monto } y revisar
+    // modifiedCount antes de acreditar al destino  
     if (cuentaOrigen.saldo < monto) {
       return res.status(400).json({
         error:           'Saldo insuficiente',
@@ -55,6 +61,9 @@ router.post('/', async (req, res) => {
     // 7. Transacción atómica
     session.startTransaction();
 
+    // !!CHECA AESTO JAVI!! -Ale
+    // Este descuento deberia usar el _id de la cuenta y validar saldo suficiente
+    // en el mismo updatepara evitar que dos transferencias dejen saldo negativo
     await db.collection('cuentas').updateOne(
       { numeroCuenta: cuentaOrigen.numeroCuenta },
       { $inc: { saldo: -monto } },

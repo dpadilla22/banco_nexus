@@ -34,6 +34,9 @@ router.post("/deposito", async (req, res) => {
         .json({ error: `Cuenta ${numeroCuenta} no encontrada` });
     }
 
+    // !!CHECA AESTO JAVI!! -Ale
+    // Aqui estamos leyendo el saldo, calculando en JS y luego guardando con $set,si llegan dos depositos al mismo tiempo,
+    //  uno puede pisar al otro asi que mejor usar $inc: { saldo: monto } para que Mongo lo haga atomico
     const nuevoSaldo = cuenta.saldo + monto;
     //Solo agregué esto ATT: Mich
     const sucursal = "Principal";
@@ -108,6 +111,10 @@ router.post("/retiro", async (req, res) => {
       });
     }
 
+    // !!CHECA AESTO JAVI!! -Ale
+    // Esta validacion de saldo pasa antes del update, pero entre este if y el $set
+    // puede entrar otro retiro y dejar el saldo mal. Para corregirlo, el update
+    // deberia filtrar con saldo: { $gte: monto } y usar $inc: { saldo: -monto }.
     const nuevoSaldo = cuenta.saldo - monto;
     //Solo agregué esto  ATT: Mich
     const sucursal = "Principal";

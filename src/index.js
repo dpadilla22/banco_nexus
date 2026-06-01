@@ -5,6 +5,8 @@ const cors = require("cors");
 const authMiddleware = require("./middlewares/auth");
 
 const app = express();
+// !!CHECA AESTO JAVI!! -Ale
+// CORS esta abierto, luego cambiar a CORS_ORIGIN 
 app.use(cors());
 app.use(express.json());
 

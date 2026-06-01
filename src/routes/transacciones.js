@@ -50,6 +50,20 @@ router.post("/deposito", async (req, res) => {
       fecha: new Date(),
     });
 
+    await db.collection("bitacora").insertOne({
+      accion: "DEPOSITO",
+      usuarioId: cuenta.clienteId,
+      estado: "EXITOSO",
+      detalle: {
+        numeroCuenta,
+        monto,
+        sucursal,
+        saldoAnterior: cuenta.saldo,
+        saldoActual: nuevoSaldo,
+      },
+      fecha: new Date(),
+    });
+
     res.json({
       mensaje: "Depósito realizado exitosamente",
       numeroCuenta,
@@ -104,6 +118,20 @@ router.post("/retiro", async (req, res) => {
       tipo: "Retiro",
       monto,
       sucursal: "Principal",
+      fecha: new Date(),
+    });
+
+    await db.collection("bitacora").insertOne({
+      accion: "RETIRO",
+      usuarioId: cuenta.clienteId,
+      estado: "EXITOSO",
+      detalle: {
+        numeroCuenta,
+        monto,
+        sucursal,
+        saldoAnterior: cuenta.saldo,
+        saldoActual: nuevoSaldo,
+      },
       fecha: new Date(),
     });
 

@@ -17,6 +17,7 @@ const iniciar = async () => {
   app.use("/api", authMiddleware, require("./routes/transacciones"));
   app.use("/api/beneficiarios", authMiddleware, require("./routes/beneficiarios"));
   app.use("/api/transferencias", authMiddleware, require("./routes/transferencias"));
+  app.use("/api/bitacora", authMiddleware, require("./routes/bitacora"));
 
   app.get("/health", (req, res) => res.json({ status: "OK" }));
 

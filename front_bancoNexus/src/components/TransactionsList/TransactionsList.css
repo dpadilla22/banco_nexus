@@ -1,19 +1,12 @@
 .transactions {
-
   margin-top: 30px;
-
   padding: 32px;
-
   background: var(--white);
-
   border-radius: var(--radius-lg);
-
   box-shadow: var(--shadow-card);
-
 }
 
 .transactions h2 {
-
   margin-bottom: 24px;
   font-size: 1.4rem;
   font-weight: 600;
@@ -22,17 +15,11 @@
 }
 
 .transaction-item {
-
   display: flex;
-
   justify-content: space-between;
-
   align-items: center;
-
   padding: 16px 0;
-
   border-bottom: 1px solid #F0F2F5;
-
   transition: all 0.2s ease;
 
 }
@@ -68,4 +55,43 @@
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--primary-blue);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f2f5;
+}
+
+.pagination button {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #1a237e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #1a237e;
+  color: white;
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-size: 14px;
+  color: #475569;
 }

@@ -9,6 +9,7 @@ export default function OperationForm({
   onOperationSuccess,
   setEstadoSistema,
   fetchConTimeout,
+  authHeaders,
 }) {
   const [monto, setMonto] = useState("");
   const [loading, setLoading] = useState(false);
@@ -44,9 +45,7 @@ export default function OperationForm({
         endpoint,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: authHeaders(),
 
           body: JSON.stringify({
             numeroCuenta: String(numeroCuenta),
@@ -136,6 +135,10 @@ export default function OperationForm({
           <span>{mensajeError}</span>
         </motion.div>
       )}
+      <div className="info-saldo">
+        <span>Saldo actual:</span>
+        <strong className="saldo-texto">${saldoActual}</strong>
+      </div>
       <div className="input-group">
         <label htmlFor="monto">Ingresa el Monto</label>
         <div className="input-wrapper">
@@ -147,6 +150,13 @@ export default function OperationForm({
             value={monto}
             onChange={(e) => {
               const valor = e.target.value;
+              if (mensajeError) {
+                setMensajeError("");
+              }
+
+              if (mensajeExito) {
+                setMensajeExito("");
+              }
               if (/^\d*\.?\d*$/.test(valor)) {
                 setMonto(valor);
               }
@@ -173,10 +183,6 @@ export default function OperationForm({
           <Send size={18} />
           {loading ? "Procesando..." : "Retirar"}
         </button>
-      </div>
-      <div className="info-saldo">
-        <span>Saldo actual:</span>
-        <strong className="saldo-texto">${saldoActual}</strong>
       </div>
     </motion.div>
   );

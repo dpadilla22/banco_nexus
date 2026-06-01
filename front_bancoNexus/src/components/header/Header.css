@@ -1,18 +1,14 @@
 .header {
-
   margin-bottom: 40px;
-
 }
 
-.header h1 {
+h1 {
 
-  font-size: 2.5rem;
   font-weight: 700;
   color: #1A237E;
   display: flex;
   align-items: center;
   gap: 12px;
-
 }
 
 .header p {

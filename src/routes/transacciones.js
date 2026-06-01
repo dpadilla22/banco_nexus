@@ -35,6 +35,9 @@ router.post("/deposito", async (req, res) => {
     }
 
     const nuevoSaldo = cuenta.saldo + monto;
+    //Solo agregué esto ATT: Mich
+    const sucursal = "Principal";
+
     await db
       .collection("cuentas")
       .updateOne(
@@ -46,7 +49,7 @@ router.post("/deposito", async (req, res) => {
       cuentaId: cuenta._id,
       tipo: "Depósito",
       monto,
-      sucursal: "Principal",
+      sucursal,
       fecha: new Date(),
     });
 
@@ -106,6 +109,8 @@ router.post("/retiro", async (req, res) => {
     }
 
     const nuevoSaldo = cuenta.saldo - monto;
+    //Solo agregué esto  ATT: Mich
+    const sucursal = "Principal";
     await db
       .collection("cuentas")
       .updateOne(
@@ -117,7 +122,7 @@ router.post("/retiro", async (req, res) => {
       cuentaId: cuenta._id,
       tipo: "Retiro",
       monto,
-      sucursal: "Principal",
+      sucursal,
       fecha: new Date(),
     });
 

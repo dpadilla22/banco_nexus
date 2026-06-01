@@ -1,13 +1,11 @@
-import { CreditCard } from 'lucide-react';
-import './Header.css'; 
+import React from 'react';
+import './Header.css';
 
-export default function Header() {
+export default function Header({ usuario }) {
   return (
     <header className="header">
-      <h1>
-        Banco Nexus
-      </h1>
-      <p>Gestiona tus cuentas y transacciones de forma segura</p>
+      <h1>Bienvenido {usuario?.nombre || "Usuario"}</h1>
+      <p>Gestiona tu cuenta y transacciones de forma segura</p>
     </header>
   );
 }

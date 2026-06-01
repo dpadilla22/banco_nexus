@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { AlertCircle } from "lucide-react";
 
 import Header from "./components/header/Header";
-import SearchBar from "./components/SearchBar/SearchBar";
 import AccountCard from "./components/AccountCard/AccountCard";
 import TransactionsList from "./components/TransactionsList/TransactionsList";
 import BalanceChart from "./components/BalanceChart/BalanceChart";
@@ -11,12 +10,12 @@ import StatusBanner from "./components/StatusBanner/StatusBanner";
 import Auth from "./pages/Auth/Auth";
 
 function App() {
-  const [cuenta, setCuenta] = useState("");
   const [datos, setDatos] = useState(null);
   const [error, setError] = useState("");
   const [estadoSistema, setEstadoSistema] = useState("online");
   const [intentosFallidos, setIntentosFallidos] = useState(0);
   const [usuario, setUsuario] = useState(null);
+  const [cargandoDatos, setCargandoDatos] = useState(false);
 
   useEffect(() => {
     const usuarioGuardado = localStorage.getItem("usuario");
@@ -24,50 +23,6 @@ function App() {
     if (usuarioGuardado) {
       setUsuario(JSON.parse(usuarioGuardado));
     }
-  }, []);
-
-  useEffect(() => {
-    const verificarServidor = async () => {
-      try {
-        await fetchConTimeout(
-          "http://localhost:3000/health",
-
-          {},
-
-          3000,
-        );
-
-        setEstadoSistema("online");
-
-        setIntentosFallidos(0);
-      } catch (error) {
-        /* SUMAR FALLO */
-
-        setIntentosFallidos((prev) => {
-          const nuevosIntentos = prev + 1;
-
-          /* PRIMEROS FALLOS */
-
-          if (nuevosIntentos < 3) {
-            setEstadoSistema("loading");
-          } else {
-            /* MUCHOS FALLOS */
-
-            setEstadoSistema("offline");
-          }
-
-          return nuevosIntentos;
-        });
-      }
-    };
-
-    verificarServidor();
-
-    const interval = setInterval(verificarServidor, 3000);
-
-    /* LIMPIAR */
-
-    return () => clearInterval(interval);
   }, []);
 
   const fetchConTimeout = async (url, options = {}, timeout = 5000) => {
@@ -81,7 +36,6 @@ function App() {
       });
 
       clearTimeout(id);
-
       return response;
     } catch (error) {
       clearTimeout(id);
@@ -89,34 +43,81 @@ function App() {
     }
   };
 
-  const consultarCuenta = async () => {
+  const authHeaders = () => {
+    const token = localStorage.getItem("token");
+
+    return {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+  };
+
+  useEffect(() => {
+    const verificarServidor = async () => {
+      try {
+        await fetchConTimeout("http://localhost:3000/health", {}, 3000);
+
+        setEstadoSistema("online");
+        setIntentosFallidos(0);
+      } catch (error) {
+        setIntentosFallidos((prev) => {
+          const nuevosIntentos = prev + 1;
+
+          if (nuevosIntentos < 3) {
+            setEstadoSistema("loading");
+          } else {
+            setEstadoSistema("offline");
+          }
+
+          return nuevosIntentos;
+        });
+      }
+    };
+
+    verificarServidor();
+    const interval = setInterval(verificarServidor, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const consultarCuenta = async (numeroCuenta) => {
+    if (!numeroCuenta) return;
+
     try {
       setError("");
-      setDatos(null);
+      setCargandoDatos(true);
       setEstadoSistema("loading");
 
       const response = await fetchConTimeout(
-        `http://localhost:3000/api/cuenta/${cuenta}`,
+        `http://localhost:3000/api/cuenta/${numeroCuenta}`,
+        {
+          headers: authHeaders(),
+        },
+        5000,
       );
 
-      let data;
+      let data = null;
       try {
         data = await response.json();
-      } catch (parseError) {
-        console.error("Error al parsear JSON:", parseError);
-        setError("Error en la respuesta del servidor");
+      } catch {
+        data = null;
+      }
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("usuario");
+          setUsuario(null);
+          setError("Tu sesión expiró. Inicia sesión nuevamente.");
+          return;
+        }
+
+        setError(data?.error || "Error al consultar la cuenta");
         setEstadoSistema("offline");
         return;
       }
 
-      if (!response.ok) {
-        setError(data.error || "Error al consultar la cuenta");
-        setEstadoSistema("online");
-        return;
-      }
-
       setDatos(data);
-
       setEstadoSistema("online");
     } catch (error) {
       console.log(error);
@@ -128,26 +129,31 @@ function App() {
         setError("Error de conexión. El servidor no está disponible.");
         setEstadoSistema("offline");
       }
+    } finally {
+      setCargandoDatos(false);
     }
   };
 
-  const manejarOperacionExitosa = async () => {
-    if (!cuenta) return;
-    try {
-      const response = await fetchConTimeout(
-        `http://localhost:3000/api/cuenta/${cuenta}`,
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setDatos(data);
-        setEstadoSistema("online");
-      }
-    } catch (error) {
-      console.error("Error al actualizar cuenta:", error);
-      setEstadoSistema("offline");
+  useEffect(() => {
+    if (usuario?.numeroCuenta) {
+      consultarCuenta(usuario.numeroCuenta);
     }
+  }, [usuario]);
+
+  const manejarOperacionExitosa = async () => {
+    if (usuario?.numeroCuenta) {
+      await consultarCuenta(usuario.numeroCuenta);
+    }
+  };
+
+  const cerrarSesion = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
+    setUsuario(null);
+    setDatos(null);
+    setError("");
+    setEstadoSistema("online");
+    setIntentosFallidos(0);
   };
 
   if (!usuario) {
@@ -162,15 +168,32 @@ function App() {
         padding: "40px",
       }}
     >
-      <Header />
+      <Header usuario={usuario} />
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: "12px",
+        }}
+      >
+        <button
+          onClick={cerrarSesion}
+          style={{
+            border: "none",
+            background: "#f3f4f6",
+            color: "#1a237e",
+            padding: "10px 16px",
+            borderRadius: "12px",
+            cursor: "pointer",
+            fontWeight: 600,
+          }}
+        >
+          Cerrar sesión
+        </button>
+      </div>
 
       <StatusBanner estado={estadoSistema} />
-
-      <SearchBar
-        cuenta={cuenta}
-        setCuenta={setCuenta}
-        consultarCuenta={consultarCuenta}
-      />
 
       {error && (
         <div
@@ -188,24 +211,39 @@ function App() {
           }}
         >
           <AlertCircle size={20} />
-          <span
-            style={{
-              fontWeight: "500",
-            }}
-          >
-            {error}
-          </span>
+          <span style={{ fontWeight: "500" }}>{error}</span>
         </div>
       )}
+
+      {cargandoDatos && !datos && (
+        <div
+          style={{
+            padding: "18px 20px",
+            background: "#ffffff",
+            borderRadius: "16px",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+            marginBottom: "24px",
+            color: "#1a237e",
+            fontWeight: 600,
+          }}
+        >
+          Cargando información de la cuenta...
+        </div>
+      )}
+
       <AccountCard datos={datos} />
+
       <OperationForm
-        numeroCuenta={datos?.cuenta?.numeroCuenta}
+        numeroCuenta={usuario?.numeroCuenta}
         saldoActual={datos?.cuenta?.saldo || 0}
         onOperationSuccess={manejarOperacionExitosa}
         setEstadoSistema={setEstadoSistema}
         fetchConTimeout={fetchConTimeout}
+        authHeaders={authHeaders}
       />
+
       <TransactionsList datos={datos} />
+
       <BalanceChart datos={datos} />
     </div>
   );

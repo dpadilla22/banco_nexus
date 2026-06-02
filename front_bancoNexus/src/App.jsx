@@ -9,6 +9,7 @@ import OperationForm from "./components/OperationForm/OperationForm";
 import StatusBanner from "./components/StatusBanner/StatusBanner";
 import Auth from "./pages/Auth/Auth";
 import Sidebar from "./components/Sidebar/Sidebar";
+import Profile from "./pages/Profile/Profile";
 
 function App() {
   const [datos, setDatos] = useState(null);
@@ -107,18 +108,14 @@ function App() {
 
       if (!response.ok) {
         if (response.status === 401) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("usuario");
-          setUsuario(null);
+          cerrarSesion();
           setError("Tu sesión expiró. Inicia sesión nuevamente.");
           return;
         }
-
         setError(data?.error || "Error al consultar la cuenta");
         setEstadoSistema("offline");
         return;
       }
-
       setDatos(data);
       setEstadoSistema("online");
     } catch (error) {
@@ -156,6 +153,7 @@ function App() {
     setError("");
     setEstadoSistema("online");
     setIntentosFallidos(0);
+    setPantalla("dashboard");
   };
 
   if (!usuario) {
@@ -170,7 +168,7 @@ function App() {
         padding: "40px",
       }}
     >
-      <Header usuario={usuario} />
+      {pantalla !== "perfil" && <Header usuario={usuario} />}
 
       <Sidebar
         pantalla={pantalla}
@@ -243,7 +241,13 @@ function App() {
         </>
       )}
 
-      {pantalla === "perfil" && <h2>Perfil (pendiente)</h2>}
+      {pantalla === "perfil" && (
+        <Profile
+          authHeaders={authHeaders}
+          usuario={usuario}
+          setUsuario={setUsuario}
+        />
+      )}
 
       {pantalla === "movimientos" && <h2>Movimientos (pendiente)</h2>}
 

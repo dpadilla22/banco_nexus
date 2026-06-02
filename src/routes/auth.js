@@ -11,65 +11,66 @@ const getNextCuentaSequence = async (db) => {
     { $inc: { seq: 1 } },
     { upsert: true, returnDocument: 'after' },
   );
-  return result.value.seq;
+  return result.seq;
 };
 
 // ──────────────────────────────────────────────────────────────────────────────────
 //                                      REGISTRO
 // ──────────────────────────────────────────────────────────────────────────────────
-router.post("/registro", async (req, res) => {
+router.post('/registro', async (req, res) => {
   try {
     const { nombre, curp, telefono, correo, contrasena, tipoCuenta } = req.body;
     const db = getDb();
 
     if (!nombre || !curp || !telefono || !correo || !contrasena) {
-      return res.status(400).json({ error: "Todos los campos son requeridos" });
+      return res.status(400).json({ error: 'Todos los campos son requeridos' });
     }
 
-    const existe = await db.collection("clientes").findOne({ correo });
+    const existe = await db.collection('clientes').findOne({ correo });
     if (existe) {
-      return res.status(400).json({ error: "El correo ya está registrado" });
+      return res.status(400).json({ error: 'El correo ya está registrado' });
     }
 
     const hash = await bcrypt.hash(contrasena, 10);
 
-    const resultado = await db.collection("clientes").insertOne({
+    const resultado = await db.collection('clientes').insertOne({
       nombre,
       curp,
       telefono,
       correo,
       contrasena: hash,
-      fechaRegistro: new Date(),
+      fechaRegistro: new Date()
     });
 
     const clienteId = resultado.insertedId;
 
-    const secuenciaCuenta = await getNextCuentaSequence(db);
-    const numeroCuenta = generarNumeroCuenta(secuenciaCuenta);
+    const totalCuentas = await db.collection('cuentas').countDocuments();
+    const numeroCuenta = generarNumeroCuenta(totalCuentas + 1);
 
-    await db.collection("cuentas").insertOne({
+    await db.collection('cuentas').insertOne({
       numeroCuenta,
       saldo: 0,
-      tipoCuenta: tipoCuenta || "Débito",
+      tipoCuenta: tipoCuenta || 'Débito',
       clienteId,
-      fechaCreacion: new Date(),
+      fechaCreacion: new Date()
     });
 
-    await db.collection("bitacora").insertOne({
-      accion: "REGISTRO",
+    await db.collection('bitacora').insertOne({
+      accion:    'REGISTRO',
       usuarioId: clienteId,
-      estado: "EXITOSO",
-      detalle: `Cliente registrado con cuenta ${numeroCuenta}`,
-      fecha: new Date(),
+      estado:    'EXITOSO',
+      detalle:   `Cliente registrado con cuenta ${numeroCuenta}`,
+      fecha:     new Date()
     });
 
     res.status(201).json({
-      mensaje: "Cliente registrado exitosamente",
-      numeroCuenta,
+      mensaje:       'Cliente registrado exitosamente',
+      numeroCuenta
     });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error interno del servidor" });
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
@@ -191,6 +192,78 @@ router.get("/perfil", require("../middlewares/auth"), async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────────────
+//                                ACTUALIZAR DATOS
+// ──────────────────────────────────────────────────────────────────────────────────
+router.put('/perfil', require('../middlewares/auth'), async (req, res) => {
+  try {
+    const { nombre, telefono, correo } = req.body;
+    const { ObjectId } = require('mongodb');
+    const clienteId = new ObjectId(req.cliente.clienteId);
+    const db = getDb();
+
+    // 1. Validar que al menos un campo viene
+    if (!nombre && !telefono && !correo) {
+      return res.status(400).json({ error: 'Debes enviar al menos un campo para actualizar' });
+    }
+
+    // 2. Si viene correo, verificar que no esté usado por otro usuario
+    if (correo) {
+      const existe = await db.collection('clientes').findOne({
+        correo,
+        _id: { $ne: clienteId }
+      });
+      if (existe) {
+        return res.status(400).json({ error: 'El correo ya está en uso por otro usuario' });
+      }
+    }
+
+    // 3. Construir objeto con solo los campos que vinieron
+    const camposActualizar = {};
+    if (nombre)   camposActualizar.nombre   = nombre;
+    if (telefono) camposActualizar.telefono = telefono;
+    if (correo)   camposActualizar.correo   = correo;
+
+    // 4. Actualizar en BD
+    await db.collection('clientes').updateOne(
+      { _id: clienteId },
+      { $set: camposActualizar }
+    );
+
+    // 5. Bitácora
+    await db.collection('bitacora').insertOne({
+      accion:    'ACTUALIZACION_PERFIL',
+      usuarioId: clienteId,
+      estado:    'EXITOSO',
+      detalle:   `Campos actualizados: ${Object.keys(camposActualizar).join(', ')}`,
+      fecha:     new Date()
+    });
+
+    // 6. Regresar datos actualizados
+    const clienteActualizado = await db.collection('clientes').findOne(
+      { _id: clienteId },
+      { projection: { contrasena: 0 } }
+    );
+
+    const cuenta = await db.collection('cuentas').findOne({ clienteId });
+
+    res.json({
+      mensaje: 'Perfil actualizado exitosamente',
+      cliente: {
+        nombre:       clienteActualizado.nombre,
+        correo:       clienteActualizado.correo,
+        telefono:     clienteActualizado.telefono,
+        curp:         clienteActualizado.curp,
+        numeroCuenta: cuenta.numeroCuenta
+      }
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 

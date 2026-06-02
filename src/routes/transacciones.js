@@ -41,13 +41,13 @@ router.post("/deposito", async (req, res) => {
       { returnDocument: "after" },
     );
 
-    if (!depositoResult.value) {
+    if (!depositoResult) {
       return res
         .status(404)
         .json({ error: `Cuenta ${numeroCuenta} no encontrada` });
     }
 
-    const actualizado = depositoResult.value;
+    const actualizado = depositoResult;
 
     await db.collection("transacciones").insertOne({
       cuentaId: actualizado._id,
@@ -110,7 +110,7 @@ router.post("/retiro", async (req, res) => {
       { returnDocument: "after" },
     );
 
-    if (!retiroResult.value) {
+    if (!retiroResult) {
       return res.status(400).json({
         error: "Saldo insuficiente",
         saldoActual: cuenta.saldo,
@@ -119,7 +119,7 @@ router.post("/retiro", async (req, res) => {
       });
     }
 
-    const actualizado = retiroResult.value;
+    const actualizado = retiroResult;
 
     await db.collection("transacciones").insertOne({
       cuentaId: actualizado._id,

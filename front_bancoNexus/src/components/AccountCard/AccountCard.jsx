@@ -1,5 +1,4 @@
 import "./AccountCard.css";
-
 import { motion } from "framer-motion";
 import { User, Wallet, DollarSign, CreditCard } from "lucide-react";
 
@@ -13,7 +12,6 @@ export default function AccountCard({ datos }) {
       animate={{ opacity: 1, y: 0 }}
     >
       <h2>Información de Cuenta</h2>
-
       <div className="info-grid">
         <div>
           <span
@@ -26,10 +24,8 @@ export default function AccountCard({ datos }) {
             <User size={18} />
             Cliente
           </span>
-
           <h3>{datos.cuenta.titular.nombre}</h3>
         </div>
-
         <div>
           <span
             style={{
@@ -41,10 +37,8 @@ export default function AccountCard({ datos }) {
             <CreditCard size={18} />
             Número de cuenta
           </span>
-
           <h3>{datos.cuenta.numeroCuenta}</h3>
         </div>
-
         <div>
           <span
             style={{
@@ -56,10 +50,8 @@ export default function AccountCard({ datos }) {
             <Wallet size={18} />
             Tipo
           </span>
-
           <h3>{datos.cuenta.tipoCuenta}</h3>
         </div>
-
         <div>
           <span
             style={{
@@ -71,8 +63,12 @@ export default function AccountCard({ datos }) {
             <DollarSign size={18} />
             Saldo
           </span>
-
-          <h1>${datos.cuenta.saldo}</h1>
+          <h1>
+            {new Intl.NumberFormat("es-MX", {
+              style: "currency",
+              currency: "MXN",
+            }).format(datos.cuenta.saldo)}
+          </h1>
         </div>
       </div>
     </motion.div>

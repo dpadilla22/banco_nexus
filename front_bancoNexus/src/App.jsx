@@ -8,6 +8,7 @@ import BalanceChart from "./components/BalanceChart/BalanceChart";
 import OperationForm from "./components/OperationForm/OperationForm";
 import StatusBanner from "./components/StatusBanner/StatusBanner";
 import Auth from "./pages/Auth/Auth";
+import Sidebar from "./components/Sidebar/Sidebar";
 
 function App() {
   const [datos, setDatos] = useState(null);
@@ -16,6 +17,7 @@ function App() {
   const [intentosFallidos, setIntentosFallidos] = useState(0);
   const [usuario, setUsuario] = useState(null);
   const [cargandoDatos, setCargandoDatos] = useState(false);
+  const [pantalla, setPantalla] = useState("dashboard");
 
   useEffect(() => {
     const usuarioGuardado = localStorage.getItem("usuario");
@@ -170,28 +172,19 @@ function App() {
     >
       <Header usuario={usuario} />
 
+      <Sidebar
+        pantalla={pantalla}
+        setPantalla={setPantalla}
+        cerrarSesion={cerrarSesion}
+      />
+
       <div
         style={{
           display: "flex",
           justifyContent: "flex-end",
           marginBottom: "12px",
         }}
-      >
-        <button
-          onClick={cerrarSesion}
-          style={{
-            border: "none",
-            background: "#f3f4f6",
-            color: "#1a237e",
-            padding: "10px 16px",
-            borderRadius: "12px",
-            cursor: "pointer",
-            fontWeight: 600,
-          }}
-        >
-          Cerrar sesión
-        </button>
-      </div>
+      ></div>
 
       <StatusBanner estado={estadoSistema} />
 
@@ -231,20 +224,32 @@ function App() {
         </div>
       )}
 
-      <AccountCard datos={datos} />
+      {pantalla === "dashboard" && (
+        <>
+          <AccountCard datos={datos} />
 
-      <OperationForm
-        numeroCuenta={usuario?.numeroCuenta}
-        saldoActual={datos?.cuenta?.saldo || 0}
-        onOperationSuccess={manejarOperacionExitosa}
-        setEstadoSistema={setEstadoSistema}
-        fetchConTimeout={fetchConTimeout}
-        authHeaders={authHeaders}
-      />
+          <OperationForm
+            numeroCuenta={usuario?.numeroCuenta}
+            saldoActual={datos?.cuenta?.saldo || 0}
+            onOperationSuccess={manejarOperacionExitosa}
+            setEstadoSistema={setEstadoSistema}
+            fetchConTimeout={fetchConTimeout}
+            authHeaders={authHeaders}
+          />
 
-      <TransactionsList datos={datos} />
+          <TransactionsList datos={datos} />
 
-      <BalanceChart datos={datos} />
+          <BalanceChart datos={datos} />
+        </>
+      )}
+
+      {pantalla === "perfil" && <h2>Perfil (pendiente)</h2>}
+
+      {pantalla === "movimientos" && <h2>Movimientos (pendiente)</h2>}
+
+      {pantalla === "transferencias" && <h2>Transferencias (pendiente)</h2>}
+
+      {pantalla === "bitacora" && <h2>Bitácora (pendiente)</h2>}
     </div>
   );
 }

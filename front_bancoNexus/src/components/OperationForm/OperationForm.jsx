@@ -101,7 +101,6 @@ export default function OperationForm({
       }}
     >
       <h2>Operaciones Bancarias</h2>
-
       {mensajeExito && (
         <motion.div
           className="mensaje-exito"
@@ -118,7 +117,6 @@ export default function OperationForm({
           <span>{mensajeExito}</span>
         </motion.div>
       )}
-
       {mensajeError && (
         <motion.div
           className="mensaje-error"
@@ -137,7 +135,12 @@ export default function OperationForm({
       )}
       <div className="info-saldo">
         <span>Saldo actual:</span>
-        <strong className="saldo-texto">${saldoActual}</strong>
+        <strong className="saldo-texto">
+          {new Intl.NumberFormat("es-MX", {
+            style: "currency",
+            currency: "MXN",
+          }).format(saldoActual)}
+        </strong>
       </div>
       <div className="input-group">
         <label htmlFor="monto">Ingresa el Monto</label>
@@ -153,7 +156,6 @@ export default function OperationForm({
               if (mensajeError) {
                 setMensajeError("");
               }
-
               if (mensajeExito) {
                 setMensajeExito("");
               }

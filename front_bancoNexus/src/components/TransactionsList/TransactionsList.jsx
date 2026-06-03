@@ -85,6 +85,9 @@ export default function TransactionsList({ datos, modo = "dashboard" }) {
   return (
     <div className="transactions">
       <h2>Movimientos</h2>
+      {movimientosActuales.length === 0 && (
+        <div className="empty-state">No existen movimientos registrados.</div>
+      )}
       {movimientosActuales.map((t, index) => (
         <div className="transaction-item" key={index}>
           <div
@@ -106,7 +109,9 @@ export default function TransactionsList({ datos, modo = "dashboard" }) {
             <div>
               <h4>{getTipoMovimiento(t)}</h4>
               {modo === "historial" && t.mensaje && (
-                <small className="concepto">{t.mensaje}</small>
+                <p className="movimiento-extra">
+                  <strong>Concepto:</strong> {t.mensaje}
+                </p>
               )}
               <p>
                 {new Date(t.fecha).toLocaleString("es-MX", {
@@ -114,11 +119,15 @@ export default function TransactionsList({ datos, modo = "dashboard" }) {
                   timeStyle: "short",
                 })}
               </p>
-              {modo === "historial" && (t.cuentaDestino || t.cuentaOrigen) && (
-                <p className="cuenta-info">
-                  {t.cuentaDestino && `Destino: ${t.cuentaDestino}`}
+              {modo === "historial" && t.cuentaDestino && (
+                <p className="movimiento-extra">
+                  <strong>Destino:</strong> {t.cuentaDestino}
+                </p>
+              )}
 
-                  {t.cuentaOrigen && `Origen: ${t.cuentaOrigen}`}
+              {modo === "historial" && t.cuentaOrigen && (
+                <p className="movimiento-extra">
+                  <strong>Origen:</strong> {t.cuentaOrigen}
                 </p>
               )}
             </div>
@@ -128,15 +137,17 @@ export default function TransactionsList({ datos, modo = "dashboard" }) {
               color: getColorMonto(t.tipo),
             }}
           >
-            {t.tipo.toLowerCase().includes("retiro")
-              ? "-"
-              : t.tipo.toLowerCase().includes("transferencia")
-                ? ""
+            {t.tipo.toLowerCase().includes("transferencia")
+              ? t.monto < 0
+                ? "-"
+                : "+"
+              : t.tipo.toLowerCase().includes("retiro")
+                ? "-"
                 : "+"}
             {new Intl.NumberFormat("es-MX", {
               style: "currency",
               currency: "MXN",
-            }).format(t.monto)}
+            }).format(Math.abs(t.monto))}
           </h3>
         </div>
       ))}

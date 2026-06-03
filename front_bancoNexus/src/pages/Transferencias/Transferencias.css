@@ -198,11 +198,6 @@
     color: #c62828;
 }
 
-.input-error {
-    border: 2px solid #ef4444 !important;
-    background: #fff5f5 !important;
-}
-
 .field-error {
     color: #dc2626;
     font-size: 12px;
@@ -248,6 +243,12 @@
 .transfer-input-wrapper input {
     width: 100%;
     padding-left: 42px !important;
+}
+
+.input-error:focus {
+    border-color: #ef4444 !important;
+    background: #fff5f5 !important;
+    outline: none;
 }
 
 @media (max-width: 900px) {

@@ -108,3 +108,19 @@
   font-size: 12px !important;
   color: #64748b !important;
 }
+
+.movimiento-extra {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 3px;
+}
+
+.movimiento-extra strong {
+  color: #475569;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+}

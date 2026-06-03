@@ -95,3 +95,16 @@
   font-size: 14px;
   color: #475569;
 }
+
+.concepto {
+  display: block;
+  color: var(--primary-blue);
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.cuenta-info {
+  font-size: 12px !important;
+  color: #64748b !important;
+}

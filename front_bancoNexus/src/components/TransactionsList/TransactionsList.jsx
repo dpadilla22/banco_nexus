@@ -4,29 +4,81 @@ import {
   ArrowUpRight,
   ChevronLeft,
   ChevronRight,
+  ArrowLeftRight,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 
-export default function TransactionsList({ datos }) {
+export default function TransactionsList({ datos, modo = "dashboard" }) {
   const [paginaActual, setPaginaActual] = useState(1);
   const transacciones = datos?.transacciones || [];
-  const movimientosPorPagina = 5;
+  const movimientosPorPagina = modo === "dashboard" ? 5 : 5;
   const totalPaginas = Math.ceil(transacciones.length / movimientosPorPagina);
 
   const movimientosActuales = useMemo(() => {
+    if (modo === "dashboard") {
+      return transacciones.slice(0, 5);
+    }
+
     const inicio = (paginaActual - 1) * movimientosPorPagina;
     const fin = inicio + movimientosPorPagina;
     return transacciones.slice(inicio, fin);
-  }, [transacciones, paginaActual]);
+  }, [transacciones, paginaActual, modo]);
+
+  const getTipoMovimiento = (t) => {
+    if (t.tipo.toLowerCase().includes("transferencia")) {
+      return t.monto < 0 ? "Transferencia enviada" : "Transferencia recibida";
+    }
+
+    return t.tipo;
+  };
 
   const getIcon = (tipo) => {
-    if (
-      tipo.toLowerCase().includes("retiro") ||
-      tipo.toLowerCase().includes("salida")
-    ) {
-      return <ArrowUpRight size={18} style={{ color: "#FF6B6B" }} />;
+    const texto = tipo.toLowerCase();
+
+    if (texto.includes("transferencia")) {
+      return (
+        <ArrowLeftRight
+          size={18}
+          style={{
+            color: "var(--primary-blue)",
+          }}
+        />
+      );
     }
-    return <ArrowDownLeft size={18} style={{ color: "#4CAF50" }} />;
+
+    if (texto.includes("retiro")) {
+      return (
+        <ArrowUpRight
+          size={18}
+          style={{
+            color: "#ef4444",
+          }}
+        />
+      );
+    }
+
+    return (
+      <ArrowDownLeft
+        size={18}
+        style={{
+          color: "#22c55e",
+        }}
+      />
+    );
+  };
+
+  const getColorMonto = (tipo) => {
+    const texto = tipo.toLowerCase();
+
+    if (texto.includes("transferencia")) {
+      return "var(--primary-blue)";
+    }
+
+    if (texto.includes("retiro")) {
+      return "#ef4444";
+    }
+
+    return "#22c55e";
   };
 
   if (!datos) return null;
@@ -52,23 +104,35 @@ export default function TransactionsList({ datos }) {
               {getIcon(t.tipo)}
             </div>
             <div>
-              <h4>{t.tipo}</h4>
+              <h4>{getTipoMovimiento(t)}</h4>
+              {modo === "historial" && t.mensaje && (
+                <small className="concepto">{t.mensaje}</small>
+              )}
               <p>
                 {new Date(t.fecha).toLocaleString("es-MX", {
                   dateStyle: "short",
                   timeStyle: "short",
                 })}
               </p>
+              {modo === "historial" && (t.cuentaDestino || t.cuentaOrigen) && (
+                <p className="cuenta-info">
+                  {t.cuentaDestino && `Destino: ${t.cuentaDestino}`}
+
+                  {t.cuentaOrigen && `Origen: ${t.cuentaOrigen}`}
+                </p>
+              )}
             </div>
           </div>
           <h3
             style={{
-              color: t.tipo.toLowerCase().includes("retiro")
-                ? "#ef4444"
-                : "#22c55e",
+              color: getColorMonto(t.tipo),
             }}
           >
-            {t.tipo.toLowerCase().includes("retiro") ? "-" : "+"}
+            {t.tipo.toLowerCase().includes("retiro")
+              ? "-"
+              : t.tipo.toLowerCase().includes("transferencia")
+                ? ""
+                : "+"}
             {new Intl.NumberFormat("es-MX", {
               style: "currency",
               currency: "MXN",
@@ -76,7 +140,7 @@ export default function TransactionsList({ datos }) {
           </h3>
         </div>
       ))}
-      {totalPaginas > 1 && (
+      {modo === "historial" && totalPaginas > 1 && (
         <div className="pagination">
           <button
             onClick={() => setPaginaActual((prev) => Math.max(prev - 1, 1))}

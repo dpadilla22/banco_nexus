@@ -11,6 +11,7 @@ import Auth from "./pages/Auth/Auth";
 import Sidebar from "./components/Sidebar/Sidebar";
 import Profile from "./pages/Profile/Profile";
 import Transferencias from "./pages/Transferencias/Transferencias";
+import Movimientos from "./pages/Movimientos/Movimientos";
 
 function App() {
   const [datos, setDatos] = useState(null);
@@ -169,9 +170,9 @@ function App() {
         padding: "40px",
       }}
     >
-      {pantalla !== "perfil" && pantalla !== "transferencias" && (
-        <Header usuario={usuario} />
-      )}
+      {pantalla !== "perfil" &&
+        pantalla !== "transferencias" &&
+        pantalla !== "movimientos" && <Header usuario={usuario} />}
 
       <Sidebar
         pantalla={pantalla}
@@ -238,7 +239,7 @@ function App() {
             authHeaders={authHeaders}
           />
 
-          <TransactionsList datos={datos} />
+          <TransactionsList datos={datos} modo="dashboard" />
 
           <BalanceChart datos={datos} />
         </>
@@ -252,7 +253,7 @@ function App() {
         />
       )}
 
-      {pantalla === "movimientos" && <h2>Movimientos (pendiente)</h2>}
+      {pantalla === "movimientos" && <Movimientos datos={datos} />}
 
       {pantalla === "transferencias" && (
         <Transferencias

@@ -10,6 +10,7 @@ import StatusBanner from "./components/StatusBanner/StatusBanner";
 import Auth from "./pages/Auth/Auth";
 import Sidebar from "./components/Sidebar/Sidebar";
 import Profile from "./pages/Profile/Profile";
+import Transferencias from "./pages/Transferencias/Transferencias";
 
 function App() {
   const [datos, setDatos] = useState(null);
@@ -168,7 +169,9 @@ function App() {
         padding: "40px",
       }}
     >
-      {pantalla !== "perfil" && <Header usuario={usuario} />}
+      {pantalla !== "perfil" && pantalla !== "transferencias" && (
+        <Header usuario={usuario} />
+      )}
 
       <Sidebar
         pantalla={pantalla}
@@ -251,7 +254,13 @@ function App() {
 
       {pantalla === "movimientos" && <h2>Movimientos (pendiente)</h2>}
 
-      {pantalla === "transferencias" && <h2>Transferencias (pendiente)</h2>}
+      {pantalla === "transferencias" && (
+        <Transferencias
+          authHeaders={authHeaders}
+          onTransferSuccess={manejarOperacionExitosa}
+          saldoActual={datos?.cuenta?.saldo || 0}
+        />
+      )}
 
       {pantalla === "bitacora" && <h2>Bitácora (pendiente)</h2>}
     </div>

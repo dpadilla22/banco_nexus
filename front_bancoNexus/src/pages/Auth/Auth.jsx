@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Mail, Lock, User, Eye, EyeOff, Info, Phone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import "./Auth.css";
-
+import { API_URL } from "./config/api";
 export default function Auth({ setUsuario }) {
   const [esRegistro, setEsRegistro] = useState(false);
 

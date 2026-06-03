@@ -262,8 +262,6 @@ function App() {
           saldoActual={datos?.cuenta?.saldo || 0}
         />
       )}
-
-      {pantalla === "bitacora" && <h2>Bitácora (pendiente)</h2>}
     </div>
   );
 }

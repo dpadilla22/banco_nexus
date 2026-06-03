@@ -5,7 +5,6 @@ import {
   ArrowLeftRight,
   History,
   User,
-  ClipboardList,
   LogOut,
 } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -34,11 +33,6 @@ export default function Sidebar({ pantalla, setPantalla, cerrarSesion }) {
       id: "perfil",
       texto: "Perfil",
       icono: <User size={18} />,
-    },
-    {
-      id: "bitacora",
-      texto: "Bitácora",
-      icono: <ClipboardList size={18} />,
     },
   ];
 

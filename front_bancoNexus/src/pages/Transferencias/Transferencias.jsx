@@ -51,7 +51,7 @@ export default function Transferencias({
 
   const cargarBeneficiarios = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/beneficiarios", {
+      const response = await fetch(`${API_URL}/api/beneficiarios`, {
         headers: authHeaders(),
       });
 
@@ -92,7 +92,7 @@ export default function Transferencias({
     try {
       setLoadingBeneficiario(true);
 
-      const response = await fetch("http://localhost:3000/api/beneficiarios", {
+      const response = await fetch(`${API_URL}/api/beneficiarios`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({
@@ -153,7 +153,7 @@ export default function Transferencias({
     try {
       setLoadingTransferencia(true);
 
-      const response = await fetch("http://localhost:3000/api/transferencias", {
+      const response = await fetch(`${API_URL}/api/transferencias`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({

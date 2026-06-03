@@ -60,7 +60,7 @@ function App() {
   useEffect(() => {
     const verificarServidor = async () => {
       try {
-        await fetchConTimeout("http://localhost:3000/health", {}, 3000);
+        await fetchConTimeout('${API_URL}/health', {}, 3000);
 
         setEstadoSistema("online");
         setIntentosFallidos(0);
@@ -94,7 +94,7 @@ function App() {
       setEstadoSistema("loading");
 
       const response = await fetchConTimeout(
-        `http://localhost:3000/api/cuenta/${numeroCuenta}`,
+        `${API_URL}/api/cuenta/${numeroCuenta}`,
         {
           headers: authHeaders(),
         },

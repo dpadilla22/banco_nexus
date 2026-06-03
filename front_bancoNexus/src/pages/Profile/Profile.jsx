@@ -39,7 +39,7 @@ export default function Profile({ authHeaders, usuario, setUsuario }) {
     try {
       setLoading(true);
 
-      const response = await fetch("http://localhost:3000/api/auth/perfil", {
+      const response = await fetch(`${API_URL}/api/auth/perfil`, {
         headers: authHeaders(),
       });
 
@@ -95,7 +95,7 @@ export default function Profile({ authHeaders, usuario, setUsuario }) {
       setMensaje("");
       setError("");
 
-      const response = await fetch("http://localhost:3000/api/auth/perfil", {
+      const response = await fetch(`${API_URL}/api/auth/perfil`, {
         method: "PUT",
         headers: authHeaders(),
         body: JSON.stringify({

@@ -38,8 +38,8 @@ export default function OperationForm({
       setEstadoSistema("loading");
       const endpoint =
         tipo === "deposito"
-          ? "http://localhost:3000/api/deposito"
-          : "http://localhost:3000/api/retiro";
+          ? `${API_URL}/api/deposito`
+          : `${API_URL}/api/retiro`;
 
       const response = await fetchConTimeout(
         endpoint,

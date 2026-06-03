@@ -113,7 +113,7 @@ export default function Auth({ setUsuario }) {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -155,7 +155,7 @@ export default function Auth({ setUsuario }) {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/registro", {
+      const response = await fetch(`${API_URL}/api/auth/registro`, {
         method: "POST",
 
         headers: {

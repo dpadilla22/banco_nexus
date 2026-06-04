@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, DollarSign, CheckCircle, AlertCircle } from "lucide-react";
-import { API_URL } from "./config/api";
+import { API_URL } from "../../config/api";
 
 import "./OperationForm.css";
 export default function OperationForm({

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AlertCircle } from "lucide-react";
-import { API_URL } from "./config/api";
+import { API_URL } from "../../config/api";
 import Header from "./components/header/Header";
 import AccountCard from "./components/AccountCard/AccountCard";
 import TransactionsList from "./components/TransactionsList/TransactionsList";

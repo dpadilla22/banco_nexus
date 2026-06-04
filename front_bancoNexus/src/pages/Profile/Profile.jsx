@@ -11,7 +11,7 @@ import {
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
-import { API_URL } from "./config/api";
+import { API_URL } from "../../config/api";
 import "./Profile.css";
 
 export default function Profile({ authHeaders, usuario, setUsuario }) {

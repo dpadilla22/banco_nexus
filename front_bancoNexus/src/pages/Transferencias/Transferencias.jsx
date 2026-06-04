@@ -7,7 +7,7 @@ import {
   CreditCard,
   DollarSign,
 } from "lucide-react";
-import { API_URL } from "./config/api";
+import { API_URL } from "../../config/api";
 import "./Transferencias.css";
 import SearchBar from "../../components/SearchBar/SearchBar";
 

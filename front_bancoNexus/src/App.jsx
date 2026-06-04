@@ -60,7 +60,7 @@ function App() {
   useEffect(() => {
     const verificarServidor = async () => {
       try {
-        await fetchConTimeout('${API_URL}/health', {}, 3000);
+        await fetchConTimeout(`${API_URL}/health`, {}, 3000);
 
         setEstadoSistema("online");
         setIntentosFallidos(0);
